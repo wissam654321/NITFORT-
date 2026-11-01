@@ -1,0 +1,4000 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NITFORT OFFICIEL ©</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-darker.min.css">
+
+  <style>
+    :root {
+      --bg-color: #080915;
+      --sidebar-bg: #0d0f21;
+      --card-bg: #14172e;
+      --card-border: rgba(139, 92, 246, 0.2);
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-pink: #ec4899;
+      --accent-green: #10b981;
+      --accent-orange: #f59e0b;
+      --accent-primary: var(--accent-purple);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --galaxy-gradient: radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.35) 0%, transparent 55%),
+                         radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.3) 0%, transparent 55%),
+                         radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.15) 0%, transparent 70%);
+    }
+
+    body.theme-classic {
+      --bg-color: #070810;
+      --sidebar-bg: #0b0c16;
+      --card-bg: #121428;
+      --card-border: rgba(139, 92, 246, 0.15);
+      --accent-primary: #8b5cf6;
+      --galaxy-gradient: radial-gradient(circle at 50% 30%, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; user-select: none; }
+    
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(13, 15, 33, 0.8); }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); border-radius: 4px; border: 2px solid rgba(13, 15, 33, 0.8); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+    body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+    #galaxy-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+    .nebula-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--galaxy-gradient); z-index: 1; pointer-events: none; }
+
+    #toast-container {
+      position: fixed; top: 25px; right: 25px; z-index: 99999; display: flex; flex-direction: column; gap: 12px; pointer-events: none;
+    }
+    .nitfort-toast {
+      pointer-events: auto; background: rgba(20, 23, 46, 0.92); backdrop-filter: blur(16px);
+      border: 1px solid var(--accent-primary); border-left: 5px solid var(--accent-cyan);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.3);
+      color: #fff; padding: 16px 20px; border-radius: 12px; min-width: 320px; max-width: 420px; font-size: 0.9rem;
+      display: flex; align-items: flex-start; gap: 14px; animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .nitfort-toast.bot { border-left-color: var(--accent-purple); }
+    .nitfort-toast.success { border-left-color: var(--accent-green); }
+    .nitfort-toast.error { border-left-color: #ef4444; }
+    
+    @keyframes toastSlideIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes toastSlideOut { to { transform: translateX(110%); opacity: 0; } }
+
+    aside { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--card-border); display: flex; flex-direction: column; z-index: 10; position: relative; box-shadow: 5px 0 25px rgba(0,0,0,0.5); }
+    .brand { padding: 25px 20px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
+    
+    .brand-icon-shield {
+      width: 52px; height: 48px; background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      clip-path: polygon(50% 0%, 100% 20%, 100% 75%, 50% 100%, 0% 75%, 0% 20%);
+      display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.95rem; color: #ffffff;
+      box-shadow: 0 0 25px var(--accent-primary); letter-spacing: -0.5px;
+    }
+    
+    .brand-title { font-size: 1.3rem; font-weight: 900; letter-spacing: 1px; background: linear-gradient(90deg, #fff, var(--accent-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand-subtitle { font-size: 0.65rem; color: var(--text-muted); letter-spacing: 1px; }
+
+    .sidebar-menu { display: flex; flex-direction: column; gap: 6px; padding: 0 12px; }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; color: var(--text-muted); cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.25s ease; }
+    .menu-item:hover, .menu-item.active { color: white; background: linear-gradient(90deg, rgba(139, 92, 246, 0.25), rgba(6, 182, 212, 0.15)); border: 1px solid var(--card-border); box-shadow: 0 0 15px rgba(139, 92, 246, 0.2); }
+    .menu-badge { margin-left: auto; background: var(--accent-primary); color: white; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 8px var(--accent-primary); }
+
+    .storage-box { margin: 12px; padding: 10px 14px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; display: none; }
+    .storage-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin: 6px 0 0; }
+    .storage-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan)); transition: width 0.1s linear; }
+
+    .sidebar-legal { padding: 15px 20px; border-top: 1px solid var(--card-border); font-size: 0.7rem; color: var(--text-muted); line-height: 1.4; }
+    .sidebar-legal a { color: var(--accent-cyan); text-decoration: none; font-weight: 600; cursor: pointer; }
+    .sidebar-legal a:hover { text-decoration: underline; }
+
+    .sidebar-user { margin-top: auto; padding: 15px; border-top: 1px solid var(--card-border); display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); }
+    
+    .user-avatar-img, .user-avatar-fallback {
+      width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-primary); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+      font-weight: 900; font-size: 1.1rem; color: white; text-align: center; line-height: 40px; flex-shrink: 0; box-shadow: 0 0 10px var(--accent-primary);
+    }
+
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; z-index: 5; position: relative; height: 100vh; overflow-y: auto; }
+    topbar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); background: rgba(8, 9, 21, 0.75); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 20; }
+    .search-box { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border); border-radius: 12px; padding: 8px 15px; display: flex; align-items: center; gap: 10px; width: 350px; }
+    .search-box input { background: transparent; border: none; outline: none; color: white; width: 100%; font-size: 0.85rem; }
+
+    .topbar-right-actions { display: flex; align-items: center; gap: 15px; }
+    .notification-bell { position: relative; cursor: pointer; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.2s; }
+    .notification-bell:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+    .notification-badge { position: absolute; top: -3px; right: -3px; background: var(--accent-pink); color: white; font-size: 0.6rem; font-weight: 900; padding: 2px 6px; border-radius: 50%; box-shadow: 0 0 10px var(--accent-pink); display: none; }
+
+    .btn-action { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--card-border); color: white; padding: 8px 16px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+    .btn-action:hover { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-cyan); box-shadow: 0 0 12px rgba(6, 182, 212, 0.3); }
+    .btn-action.primary { background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan)); border: none; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); }
+
+    .content-area { padding: 30px; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .hero-banner { background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(6, 182, 212, 0.15)), var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 40px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    .hero-tag { background: rgba(255, 255, 255, 0.12); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: var(--accent-cyan); }
+    .hero-title { font-size: 2.2rem; font-weight: 900; margin: 15px 0 10px; }
+    .hero-desc { color: var(--text-muted); max-width: 550px; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5; }
+
+    .store-filters { display: flex; gap: 10px; margin-bottom: 25px; }
+    .filter-btn { background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-muted); padding: 8px 16px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+    .filter-btn.active, .filter-btn:hover { background: var(--accent-primary); color: white; border-color: transparent; box-shadow: 0 0 12px var(--accent-primary); }
+
+    .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .game-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+    .game-card:hover { transform: translateY(-5px); border-color: var(--accent-cyan); box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3); }
+    .game-cover { width: 100%; height: 160px; object-fit: cover; background: #1e1b4b; }
+    .game-details { padding: 15px; display: flex; flex-direction: column; flex: 1; }
+    .game-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 5px; color: #ffffff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .game-author-txt { font-size: 0.8rem; color: var(--accent-cyan); margin-bottom: 15px; cursor: pointer; display: inline-block; }
+    .game-author-txt:hover { text-decoration: underline; }
+    .game-card-footer { margin-top: auto; display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+    .game-stats { font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 10px; }
+
+    .verified-badge {
+      display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; border-radius: 50%;
+      font-size: 0.55rem; margin-left: 5px; vertical-align: middle; box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+    }
+
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; }
+    .breadcrumb span { cursor: pointer; color: white; font-weight: 600; }
+    .breadcrumb span:hover { text-decoration: underline; }
+
+    .cloud-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .cloud-controls-group { display: flex; align-items: center; gap: 10px; }
+
+    .custom-dropdown { position: relative; display: inline-block; min-width: 170px; }
+    .dropdown-btn {
+      background: linear-gradient(135deg, #101226, #1a1e3d); border: 1px solid var(--card-border); color: #ffffff;
+      padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .dropdown-btn:hover { border-color: var(--accent-cyan); box-shadow: 0 0 12px rgba(6, 182, 212, 0.3); }
+    .dropdown-menu {
+      position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #101226; border: 1px solid var(--card-border);
+      border-radius: 10px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7); display: none; flex-direction: column; z-index: 100; overflow: hidden; backdrop-filter: blur(10px);
+    }
+    .dropdown-menu.show { display: flex; }
+    .dropdown-option { padding: 8px 12px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.15s; }
+    .dropdown-option:hover { background: rgba(139, 92, 246, 0.2); color: #ffffff; }
+    .dropdown-option.selected { color: var(--accent-cyan); background: rgba(6, 182, 212, 0.1); }
+    .dropdown-option.disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .cloud-actions-bar { display: flex; gap: 12px; margin-bottom: 25px; }
+
+    .explorer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+    .file-item {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px;
+      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; cursor: pointer;
+      position: relative; transition: transform 0.2s, border-color 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .file-item:hover { transform: translateY(-4px); border-color: var(--accent-purple); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3); }
+    .file-icon { font-size: 2.5rem; color: var(--accent-cyan); }
+    .file-icon.folder { color: var(--accent-orange); }
+    .file-name { font-size: 0.85rem; font-weight: 600; word-break: break-all; max-width: 100%; }
+    .file-size { font-size: 0.7rem; color: var(--text-muted); }
+
+    .file-actions { position: absolute; top: 8px; right: 8px; display: none; gap: 5px; }
+    .file-item:hover .file-actions { display: flex; }
+    .btn-icon { background: rgba(0,0,0,0.7); border: none; color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer; }
+    .btn-icon:hover { background: #ef4444; }
+
+    .custom-file-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255, 255, 255, 0.05); border: 2px dashed var(--card-border); border-radius: 12px; padding: 18px; color: var(--text-muted); cursor: pointer; transition: all 0.2s; font-weight: 600; font-size: 0.9rem; }
+    .custom-file-btn:hover { border-color: var(--accent-cyan); color: white; background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 15px rgba(6, 182, 212, 0.2); }
+
+    .studio-vertical-layout { display: flex; flex-direction: column; gap: 20px; height: 90vh; }
+    .studio-preview-box { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+    .studio-code-box { flex: 2; background: #13141f; border: 1px solid var(--card-border); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+
+    .editor-top { padding: 12px 20px; background: #0e0f1a; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); }
+    .lang-tabs { display: flex; gap: 8px; }
+    .lang-tab { background: rgba(255, 255, 255, 0.05); border: none; color: #858585; padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .lang-tab.active { background: var(--accent-primary); color: #ffffff; box-shadow: 0 0 12px var(--accent-primary); }
+
+    .CodeMirror { height: 100% !important; font-family: 'Fira Code', monospace !important; font-size: 0.9rem !important; background: #10111d !important; line-height: 1.6 !important; }
+    .CodeMirror-gutters { background: #0b0c16 !important; border-right: 1px solid var(--card-border) !important; }
+
+    .game-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 6, 15, 0.98); z-index: 1000; display: none; flex-direction: column; }
+    .game-modal.active { display: flex; }
+    .modal-nav { padding: 12px 25px; background: var(--sidebar-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { flex: 1; position: relative; background: #000; }
+    iframe#game-frame, iframe#studio-preview { width: 100%; height: 100%; border: none; }
+
+    .modal-popup { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.82); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
+    .modal-popup.active { display: flex; }
+    .popup-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 30px; width: 440px; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; }
+    .form-input { width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 8px; color: white; outline: none; }
+
+    .settings-select {
+      background: #0b0c16; border: 1px solid var(--card-border); color: #ffffff; padding: 8px 12px; border-radius: 10px;
+      outline: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+      appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5cf6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; padding-right: 32px;
+    }
+    .settings-select:hover { border-color: var(--accent-cyan); }
+    .settings-select option { background: #14172e; color: #ffffff; padding: 10px; }
+
+    .theme-grid { display: flex; gap: 15px; margin-top: 20px; }
+    .theme-circle { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s, box-shadow 0.2s; }
+    .theme-circle:hover { transform: scale(1.15); border-color: white; box-shadow: 0 0 15px currentColor; }
+
+    .error-msg { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #f87171; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px; display: none; }
+    .success-msg { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px; display: none; }
+
+    .dev-profile-container { max-width: 900px; margin: 0 auto; }
+    .dev-profile-card { background: rgba(20, 23, 46, 0.7); border: 1px solid var(--card-border); border-radius: 20px; padding: 35px 20px; text-align: center; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px); }
+    .dev-profile-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-cyan); box-shadow: 0 0 20px rgba(6, 182, 212, 0.5); margin: 0 auto 15px; }
+    .dev-profile-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .dev-profile-sub { color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .dev-section-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+    .editor-toolbar {
+      display: flex; flex-wrap: wrap; gap: 6px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--card-border);
+    }
+    .editor-btn {
+      background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+    }
+    .editor-btn:hover { background: var(--accent-primary); color: white; }
+    .wysiwyg-editor {
+      width: 100%; min-height: 200px; max-height: 350px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; padding: 14px; color: white; outline: none; overflow-y: auto; font-size: 0.9rem; line-height: 1.6;
+    }
+    .wysiwyg-editor img { max-width: 100%; border-radius: 8px; margin: 10px 0; }
+
+    .news-card {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; position: relative;
+    }
+    .news-card:hover { transform: translateY(-3px); border-color: var(--accent-cyan); box-shadow: 0 5px 20px rgba(6, 182, 212, 0.2); }
+
+    .report-item {
+      background: rgba(20, 23, 46, 0.8); border: 1px solid var(--card-border); border-radius: 12px; padding: 18px; margin-bottom: 15px; border-left: 4px solid var(--accent-orange);
+    }
+
+    .logo-container {
+      padding: 12px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo-img {
+      max-width: 240px;
+      height: auto;
+      filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.25));
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    input, textarea {
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body class="">
+
+  <canvas id="galaxy-canvas"></canvas>
+  <div class="nebula-overlay" id="nebula-bg"></div>
+  <div id="toast-container"></div>
+
+  <aside>
+    <div class="logo-container" onclick="window.showPage('store')">
+      <img src="https://github.com/wissam654321/Project-Fortnite-Launcheur/raw/main/NITFORT%20%C2%A9.png" alt="Logo" class="logo-img" oncontextmenu="return false;" draggable="false">
+      <div id="alt-brand-title" style="display:none;">
+        <div class="brand-title">NITFORT</div>
+        <div class="brand-subtitle" data-i18n="brand_sub">WEB GAMING HUB</div>
+      </div>
+    </div>
+
+    <div class="sidebar-menu">
+      <div class="menu-item active" onclick="window.showPage('store', this)">
+        <i class="fa-solid fa-store"></i> <span data-i18n="store">Boutique & Jeux</span>
+      </div>
+      <div class="menu-item" onclick="window.showPage('my-games', this)">
+        <i class="fa-solid fa-gamepad"></i> <span data-i18n="library">Ma Bibliothèque</span>
+      </div>
+      <div class="menu-item" id="menu-cloud-item" style="display:none;" onclick="window.showPage('cloud-nft', this)">
+        <i class="fa-solid fa-cloud"></i> <span data-i18n="cloud_nft">Cloud NFT</span>
+      </div>
+      <div class="menu-item" onclick="window.showPage('upload', this)">
+        <i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="upload">Importer un Jeu</span>
+      </div>
+      <div class="menu-item" onclick="window.showPage('code-studio', this)">
+        <i class="fa-solid fa-code"></i> <span data-i18n="code_studio">NITFORT Studio</span> <span class="menu-badge" id="studio-badge-ver">v1.0.2</span>
+      </div>
+      <div class="menu-item" onclick="window.showPage('profile', this)">
+        <i class="fa-solid fa-user"></i> <span data-i18n="profile">Mon Profil</span>
+      </div>
+      <div class="menu-item" id="menu-reports-item" style="display:none;" onclick="window.showPage('admin-reports', this)">
+        <i class="fa-solid fa-flag" style="color:var(--accent-orange);"></i> <span>Signalements Admin</span>
+      </div>
+      <div class="menu-item" onclick="window.showPage('settings', this)">
+        <i class="fa-solid fa-sliders"></i> <span data-i18n="settings">Paramètres App</span>
+      </div>
+    </div>
+
+    <div class="storage-box" id="sidebar-storage-box">
+      <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
+        <span id="storage-title-txt">Stockage Cloud</span>
+        <span id="storage-txt">0.00 Mo / 100 Mo</span>
+      </div>
+      <div class="storage-bar-bg">
+        <div class="storage-bar-fill" id="storage-fill"></div>
+      </div>
+    </div>
+
+    <div class="sidebar-legal">
+      <div>© 2026 <strong>NITFORT</strong>. <span data-i18n="rights">Tous droits réservés.</span></div>
+      <div style="margin-top: 4px;">
+        <a onclick="window.showCguModal()" data-i18n="cgu">Conditions d'Utilisation</a>
+      </div>
+    </div>
+
+    <div class="sidebar-user" id="sidebar-user-info"></div>
+  </aside>
+
+  <div class="main-wrapper">
+    <topbar>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass" style="color:var(--text-muted);"></i>
+        <input type="text" id="search-input" data-i18n-placeholder="search_placeholder" placeholder="Rechercher un jeu..." oninput="window.filterGames()">
+      </div>
+      
+      <div class="topbar-right-actions">
+        <div class="notification-bell" onclick="window.openInvitationsModal()" title="Invitations Cloud reçues">
+          <i class="fa-solid fa-envelope"></i>
+          <span id="invitations-badge" class="notification-badge" style="display:none;">0</span>
+        </div>
+        <div class="notification-bell" onclick="window.showPage('news')" title="Mises à jour et actualités">
+          <i class="fa-solid fa-bell"></i>
+          <span id="news-badge" class="notification-badge" style="display:none;">1</span>
+        </div>
+        <div id="top-user-btn"></div>
+      </div>
+    </topbar>
+
+    <div class="content-area">
+
+      <section id="page-store" class="page active">
+        <div class="hero-banner">
+          <span class="hero-tag" data-i18n="hero_tag">PLATEFORME LIBRE & LIBÉRÉE</span>
+          <h1 class="hero-title" data-i18n="hero_title">Créez, importez et jouez à des jeux web instantanés.</h1>
+          <p class="hero-desc" data-i18n="hero_desc">Le launcher ultime pour publier vos créations et gérer librement vos contenus.</p>
+          <div style="display:flex; gap:12px;">
+            <button class="btn-action primary" onclick="window.showPage('upload')"><i class="fa-solid fa-upload"></i> <span data-i18n="publish_btn">Publier mon Jeu</span></button>
+            <button class="btn-action" onclick="window.showPage('code-studio')"><i class="fa-solid fa-code"></i> <span data-i18n="studio_btn">Ouvrir NITFORT Studio</span></button>
+          </div>
+        </div>
+
+        <div class="store-filters">
+          <button class="filter-btn active" onclick="window.setStoreCategory('all', this)"><i class="fa-solid fa-fire"></i> <span data-i18n="cat_all">Tous les jeux</span></button>
+          <button class="filter-btn" onclick="window.setStoreCategory('popular', this)"><i class="fa-solid fa-bolt"></i> <span data-i18n="cat_pop">Populaires & Vues</span></button>
+          <button class="filter-btn" onclick="window.setStoreCategory('loved', this)"><i class="fa-solid fa-heart" style="color:var(--accent-pink);"></i> <span data-i18n="cat_loved">Les plus aimés</span></button>
+          <button class="filter-btn" onclick="window.setStoreCategory('recent', this)"><i class="fa-solid fa-clock"></i> <span data-i18n="cat_new">Nouveautés</span></button>
+        </div>
+
+        <div class="games-grid" id="games-container"></div>
+      </section>
+
+      <section id="page-dev-view" class="page">
+        <div class="dev-profile-container">
+          <button class="btn-action" style="margin-bottom: 20px;" onclick="window.showPage('store')">
+            <i class="fa-solid fa-arrow-left"></i> Retour à la boutique
+          </button>
+          <div class="dev-profile-card">
+            <div id="dev-avatar-box"></div>
+            <div class="dev-profile-title" id="dev-name-box">--</div>
+            <div class="dev-profile-sub" id="dev-sub-box">
+              <i class="fa-solid fa-gamepad"></i> Développeur sur NITFORT • <span id="dev-count-box">0</span> projet(s) publié(s)
+            </div>
+          </div>
+          <div class="dev-section-title">
+            <i class="fa-solid fa-fire" style="color: var(--accent-orange);"></i>
+            Projets créés par <span id="dev-name-title-box">--</span>
+          </div>
+          <div class="games-grid" id="dev-games-grid"></div>
+        </div>
+      </section>
+
+      <section id="page-my-games" class="page">
+        <h2 style="margin-bottom:20px;" data-i18n="library">Mes Projets Publiés</h2>
+        <div class="games-grid" id="my-games-container"></div>
+      </section>
+
+      <section id="page-cloud-nft" class="page">
+        <div class="cloud-header-flex">
+          <div>
+            <h2 id="cloud-main-title" style="font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <i class="fa-solid fa-cloud" style="color: var(--accent-cyan);"></i> Cloud Personnel
+            </h2>
+            <div class="breadcrumb" id="cloud-breadcrumb" style="margin-bottom:0; font-size: 0.8rem;">
+              <span onclick="navigateToCloud('/')"><i class="fa-solid fa-house"></i> Racine</span>
+            </div>
+          </div>
+
+          <div class="cloud-controls-group">
+            <button class="btn-action" style="padding: 6px 10px; font-size: 0.8rem;" onclick="window.openMembersModal()" title="Voir les membres connectés">
+              <i class="fa-solid fa-users" style="color: var(--accent-cyan);"></i>
+            </button>
+
+            <div class="custom-dropdown" id="cloud-custom-dropdown">
+              <div class="dropdown-btn" onclick="window.toggleCloudDropdown(event)">
+                <span id="dropdown-selected-text"><i class="fa-solid fa-user" style="color:var(--accent-cyan)"></i> Cloud Personnel</span>
+                <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; color:var(--text-muted)"></i>
+              </div>
+              <div class="dropdown-menu" id="dropdown-options-menu">
+                <div class="dropdown-option selected" id="opt-personal" onclick="window.selectCloudDropdownOption('personal')">
+                  <i class="fa-solid fa-user"></i> Cloud Personnel
+                </div>
+                <div class="dropdown-option disabled" id="opt-shared" onclick="window.selectCloudDropdownOption('shared')">
+                  <i class="fa-solid fa-users"></i> Cloud d'Équipe (Aucun)
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-action primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="window.openShareCloudModal()" title="Inviter un ami dans un Cloud d'Équipe">
+              <i class="fa-solid fa-user-plus"></i>
+            </button>
+            <button class="btn-action" id="btn-leave-cloud" style="padding: 6px 10px; font-size: 0.8rem; color:#ef4444; border-color:rgba(239, 68, 68, 0.3); display:none;" onclick="window.leaveSharedCloud()" title="Quitter le Cloud d'Équipe">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="cloud-actions-bar">
+          <button class="btn-action primary" onclick="document.getElementById('cloud-file-input').click()">
+            <i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="import_file">Importer un Fichier</span>
+          </button>
+          <input type="file" id="cloud-file-input" style="display:none;" onchange="handleCloudFileUpload(this)">
+
+          <button class="btn-action" onclick="openCloudFolderModal()">
+            <i class="fa-solid fa-folder-plus"></i> <span data-i18n="new_folder">Nouveau Dossier</span>
+          </button>
+        </div>
+
+        <div class="explorer-grid" id="cloud-explorer-grid"></div>
+      </section>
+
+      <section id="page-news" class="page">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h2><i class="fa-solid fa-bullhorn"></i> <span data-i18n="news_title">Actualités & Mises à jour</span></h2>
+          <button id="btn-admin-add-news" class="btn-action" style="display:none; border-radius:50%; width:42px; height:42px; padding:0; justify-content:center; background:rgba(139, 92, 246, 0.2); border-color:var(--accent-primary); box-shadow:0 0 12px rgba(139, 92, 246, 0.3);" onclick="window.openPublishNewsModal()" title="Publier une actualité (Admin)">
+            <i class="fa-solid fa-plus" style="font-size:1.1rem; color:var(--accent-cyan);"></i>
+          </button>
+        </div>
+        <p style="color:var(--text-muted); margin-bottom:25px; font-size:0.9rem;" data-i18n="news_desc">Retrouvez ici l'historique complet des nouveautés déployées sur NITFORT.</p>
+        <div id="news-container" style="max-width:800px;"></div>
+      </section>
+
+      <section id="page-admin-reports" class="page">
+        <h2 style="margin-bottom:10px;"><i class="fa-solid fa-flag" style="color:var(--accent-orange);"></i> Signalements et Messages Admin</h2>
+        <p style="color:var(--text-muted); margin-bottom:25px; font-size:0.9rem;">Consultez ici tous les signalements et requêtes d'assistance envoyés par les membres.</p>
+        <div id="reports-list-container" style="max-width:850px;"></div>
+      </section>
+
+      <section id="page-upload" class="page">
+        <div class="popup-box" style="width:100%; max-width:600px; margin:0 auto;">
+          <h2 style="margin-bottom:15px;"><i class="fa-solid fa-upload"></i> <span data-i18n="upload_title">Publier un jeu HTML</span></h2>
+
+          <form onsubmit="window.handlePublishGame(event)">
+            <div class="form-group">
+              <label data-i18n="game_title">Titre du jeu</label>
+              <input type="text" id="upload-title" class="form-input" data-i18n-placeholder="game_title_ph" placeholder="Nom de votre jeu" required>
+            </div>
+            <div class="form-group">
+              <label data-i18n="game_desc">Description</label>
+              <input type="text" id="upload-desc" class="form-input" data-i18n-placeholder="game_desc_ph" placeholder="Courte description" required>
+            </div>
+            
+            <div class="form-group">
+              <label data-i18n="cover_img">Image de couverture (Facultatif)</label>
+              <div class="custom-file-btn" onclick="document.getElementById('upload-cover').click()">
+                <i class="fa-solid fa-image"></i> <span id="cover-label" data-i18n="choose_cover">Choisir une image depuis l'appareil</span>
+              </div>
+              <input type="file" id="upload-cover" accept="image/*" style="display:none;" onchange="window.updateFileLabel(this, 'cover-label')">
+            </div>
+
+            <div class="form-group">
+              <label data-i18n="game_file">Fichier du jeu (.html)</label>
+              <div class="custom-file-btn" onclick="document.getElementById('upload-html').click()">
+                <i class="fa-solid fa-file-code"></i> <span id="html-label" data-i18n="choose_file">Sélectionner le fichier .html</span>
+              </div>
+              <input type="file" id="upload-html" accept=".html" style="display:none;" required onchange="window.updateFileLabel(this, 'html-label')">
+            </div>
+
+            <button type="submit" class="btn-action primary" style="width:100%; justify-content:center; padding:14px; margin-top:10px;" data-i18n="publish_submit">Publier</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="page-code-studio" class="page">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h2 id="studio-header-title" style="font-weight: 800; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-code" style="color: var(--accent-cyan);"></i> NITFORT Studio
+          </h2>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn-action" onclick="document.getElementById('import-studio-file').click()"><i class="fa-solid fa-folder-open"></i> <span data-i18n="import_btn">Importer</span></button>
+            <input type="file" id="import-studio-file" accept=".html,.js,.py" style="display:none;" onchange="window.importStudioCode(this)">
+            <button class="btn-action" onclick="window.downloadStudioCode()"><i class="fa-solid fa-download"></i> <span data-i18n="download_btn">Installer</span></button>
+            
+            <button class="btn-action" style="border-color: var(--accent-purple); color: var(--accent-cyan);" onclick="window.openStudioCloudSaveModal()"><i class="fa-solid fa-cloud-arrow-up"></i> Mettre sur le Cloud</button>
+
+            <button class="btn-action primary" onclick="window.publishFromStudio()"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="publish_studio_btn">Publier</span></button>
+          </div>
+        </div>
+
+        <div class="studio-vertical-layout">
+          <div class="studio-preview-box" id="studio-preview-wrapper">
+            <div class="editor-top">
+              <span data-i18n="preview_title" style="font-weight: 600; font-size: 0.85rem;"><i class="fa-solid fa-desktop"></i> Aperçu du Jeu / Exécution</span>
+              <button class="btn-action" style="padding:4px 10px; font-size:0.75rem;" onclick="window.toggleStudioFullscreen()"><i class="fa-solid fa-expand"></i> <span data-i18n="fullscreen_btn">Plein Écran</span></button>
+            </div>
+            <iframe id="studio-preview" allow="fullscreen; autoplay; gamepad; microphone; camera; focus-without-user-activation" sandbox="allow-scripts allow-forms allow-modals allow-pointer-lock"></iframe>
+          </div>
+
+          <div class="studio-code-box">
+            <div class="editor-top">
+              <div class="lang-tabs" id="studio-tabs-container"></div>
+              <span style="font-size:0.75rem; color:var(--accent-cyan); font-weight: 600;" id="studio-engine-label"><i class="fa-solid fa-bolt"></i> NITFORT Studio Engine</span>
+            </div>
+            <textarea id="code-editor-target"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-profile" class="page">
+        <div class="popup-box" style="margin:0 auto; text-align:center;" id="profile-box"></div>
+      </section>
+
+      <section id="page-settings" class="page">
+        <div class="popup-box" style="margin:0 auto;">
+          <h2 data-i18n="settings_title">Paramètres de l'application</h2>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-top:5px;" data-i18n="settings_desc">Personnalisez votre expérience sur NITFORT :</p>
+          
+          <div class="form-group" style="margin-top:20px;">
+            <label style="font-weight:700;"><i class="fa-solid fa-desktop"></i> Choix de l'Interface</label>
+            <select id="ui-interface-select" class="settings-select" onchange="window.changeUIInterface(this.value)">
+              <option value="new">Nouveau</option>
+              <option value="classic">Ancien</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:15px;">
+            <label style="font-weight:700;"><i class="fa-solid fa-code-merge"></i> Version de NITFORT Studio</label>
+            <select id="studio-version-select" class="settings-select" onchange="window.changeStudioVersion(this.value)">
+              <option value="1.0.1">NITFORT V1.0.1</option>
+              <option value="1.0.2">NITFORT V1.0.2</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top:15px;">
+            <label style="font-weight:700;"><i class="fa-solid fa-globe"></i> <span data-i18n="lang_label">Langue du site / Website Language</span></label>
+            <select id="app-lang-select" class="settings-select" onchange="window.changeAppLanguage(this.value)">
+              <option value="fr">Français</option>
+              <option value="en">English (Anglais)</option>
+            </select>
+          </div>
+
+          <div style="margin-top:25px;">
+            <label style="font-weight:700; display:block; margin-bottom:8px;"><i class="fa-solid fa-palette"></i> <span data-i18n="theme_label">Couleur d'ambiance de la galaxie</span></label>
+            <div class="theme-grid">
+              <div class="theme-circle" style="background:#8b5cf6;" onclick="window.changeTheme('purple')"></div>
+              <div class="theme-circle" style="background:#06b6d4;" onclick="window.changeTheme('cyan')"></div>
+              <div class="theme-circle" style="background:#ec4899;" onclick="window.changeTheme('pink')"></div>
+              <div class="theme-circle" style="background:#10b981;" onclick="window.changeTheme('green')"></div>
+              <div class="theme-circle" style="background:#f59e0b;" onclick="window.changeTheme('orange')"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div id="report-modal" class="modal-popup">
+    <div class="popup-box">
+      <h3 style="margin-bottom:10px;"><i class="fa-solid fa-bug" style="color:var(--accent-orange);"></i> Signaler un problème / Contact Admin</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Décrivez le souci rencontré et joignez un fichier ou une capture si nécessaire :</p>
+
+      <form onsubmit="window.handleSendReport(event)">
+        <div class="form-group">
+          <label>Sujet / Titre du problème</label>
+          <input type="text" id="report-title" class="form-input" placeholder="Ex: Bug sur le Cloud, Joueur suspect..." required>
+        </div>
+
+        <div class="form-group">
+          <label>Description détaillée</label>
+          <textarea id="report-desc" class="form-input" style="min-height:90px; resize:vertical;" placeholder="Expliquez votre problème..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Pièce jointe (facultatif : image, capture ou document)</label>
+          <div class="custom-file-btn" onclick="document.getElementById('report-file-input').click()">
+            <i class="fa-solid fa-paperclip"></i> <span id="report-file-label">Ajouter une pièce jointe</span>
+          </div>
+          <input type="file" id="report-file-input" style="display:none;" onchange="window.updateFileLabel(this, 'report-file-label')">
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+          <button type="button" class="btn-action" onclick="document.getElementById('report-modal').classList.remove('active')">Annuler</button>
+          <button type="submit" class="btn-action primary"><i class="fa-solid fa-paper-plane"></i> Envoyer le signalement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="email-pending-modal" class="modal-popup">
+    <div class="popup-box" style="text-align: center;">
+      <h3 style="margin-bottom:15px;">
+        <i class="fa-solid fa-envelope-circle-check" style="color:var(--accent-cyan);"></i> Validation requise
+      </h3>
+      
+      <div style="display:flex; justify-content:center; margin: 20px 0;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: var(--accent-cyan);"></i>
+      </div>
+
+      <p style="font-size:0.9rem; color:var(--text-main); font-weight:600; margin-bottom:10px;">
+        En attente de la validation de votre e-mail...
+      </p>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:20px;">
+        Veuillez consulter votre boîte mail et cliquer sur le lien de confirmation.
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn-action primary" style="justify-content:center;" onclick="window.checkEmailVerificationStatus()">
+          J'ai validé mon e-mail
+        </button>
+        <button class="btn-action" style="justify-content:center; background:rgba(239, 68, 68, 0.2); border-color:#ef4444; color:#ef4444;" onclick="window.cancelEmailPending()">
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="authenticator-modal" class="modal-popup">
+    <div class="popup-box" style="text-align: center;">
+      <h3 style="margin-bottom:10px;"><i class="fa-solid fa-shield-halved" style="color:var(--accent-cyan);"></i> Activer la double authentification</h3>
+      <p id="totp-setup-description" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Scanne ce code avec une application TOTP.</p>
+      
+      <div id="qrcode-container" style="display:flex; justify-content:center; margin-bottom:15px; background:white; padding:15px; border-radius:10px; width:fit-content; margin-left:auto; margin-right:auto;"></div>
+      
+      <div class="form-group" style="text-align:left;">
+        <label>Code à 6 chiffres</label>
+        <input type="text" id="auth-totp-code" class="form-input" placeholder="123456" maxlength="6">
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="btn-action" onclick="document.getElementById('authenticator-modal').classList.remove('active')">Annuler</button>
+        <button class="btn-action primary" onclick="verifyAndEnableAuthenticator()">Confirmer et activer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="login-2fa-modal" class="modal-popup">
+    <div class="popup-box" style="text-align: center;">
+      <h3 style="margin-bottom:10px;"><i class="fa-solid fa-lock" style="color:var(--accent-cyan);"></i> Vérification TOTP</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Entre le code actuel de ton application d’authentification.</p>
+      
+      <div class="form-group" style="text-align:left;">
+        <label>Code de vérification</label>
+        <input type="text" id="login-totp-input" class="form-input" placeholder="123456" maxlength="6">
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn-action" style="width:100%; justify-content:center; padding:12px;" onclick="cancelLogin2FA()">Annuler</button>
+        <button class="btn-action primary" style="width:100%; justify-content:center; padding:12px;" onclick="confirmLogin2FA()">Vérifier et se connecter</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="publish-news-modal" class="modal-popup">
+    <div class="popup-box" style="width: 700px; max-width:90vw;">
+      <h2 id="news-modal-title" style="margin-bottom:15px;"><i class="fa-solid fa-pen-to-square"></i> Publier une Actualité / Annonce</h2>
+      <form onsubmit="window.handlePublishNewsSubmit(event)">
+        <input type="hidden" id="news-edit-id" value="">
+        <div class="form-group">
+          <label>Titre de l'annonce</label>
+          <input type="text" id="news-pub-title" class="form-input" placeholder="Ex: Déploiement de la mise à jour V2.0" required>
+        </div>
+        <div class="form-group">
+          <label>Catégorie / Badge</label>
+          <input type="text" id="news-pub-category" class="form-input" placeholder="Ex: Mise à jour majeure" required>
+        </div>
+
+        <div class="form-group">
+          <label>Contenu de l'annonce (Éditeur Rich Text)</label>
+          <div class="editor-toolbar">
+            <button type="button" class="editor-btn" onclick="execEditorCmd('bold')" title="Gras"><i class="fa-solid fa-bold"></i></button>
+            <button type="button" class="editor-btn" onclick="execEditorCmd('italic')" title="Italique"><i class="fa-solid fa-italic"></i></button>
+            <button type="button" class="editor-btn" onclick="execEditorCmd('underline')" title="Souligné"><i class="fa-solid fa-underline"></i></button>
+            <button type="button" class="editor-btn" onclick="execEditorCmd('formatBlock', 'h3')" title="Titre"><i class="fa-solid fa-heading"></i></button>
+            <button type="button" class="editor-btn" onclick="execEditorCmd('insertUnorderedList')" title="Liste à puces"><i class="fa-solid fa-list-ul"></i></button>
+            <button type="button" class="editor-btn" onclick="execEditorCmd('justifyLeft')" title="Aligner à gauche"><i class="fa-solid fa-align-left"></i></button>
+            <button type="button" class="editor-btn" onclick="execEditorCmd('justifyCenter')" title="Centrer"><i class="fa-solid fa-align-center"></i></button>
+            <button type="button" class="editor-btn" onclick="document.getElementById('news-image-upload-file').click()" title="Insérer une image"><i class="fa-solid fa-image"></i> Ajouter Image</button>
+            <input type="file" id="news-image-upload-file" accept="image/*" style="display:none;" onchange="insertImageIntoNewsEditor(this)">
+          </div>
+          <div id="news-wysiwyg-editor" class="wysiwyg-editor" contenteditable="true"></div>
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+          <button type="button" class="btn-action" onclick="document.getElementById('publish-news-modal').classList.remove('active')">Annuler</button>
+          <button type="submit" class="btn-action primary"><i class="fa-solid fa-paper-plane"></i> Enregistrer l'annonce</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="view-news-modal" class="modal-popup">
+    <div class="popup-box" style="width:750px; max-width:90vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--card-border); padding-bottom:12px;">
+        <span id="view-news-category" style="background:var(--accent-primary); color:white; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:6px;">--</span>
+        <span id="view-news-date" style="font-size:0.85rem; color:var(--text-muted);">--</span>
+      </div>
+      <h2 id="view-news-title" style="margin-bottom:15px; font-size:1.4rem;">--</h2>
+      <div id="view-news-content" style="background:rgba(0,0,0,0.3); padding:20px; border-radius:12px; border:1px solid var(--card-border); max-height:450px; overflow-y:auto; line-height:1.6; font-size:0.95rem; margin-bottom:15px;"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="view-news-views-count" style="font-size:0.85rem; color:var(--accent-cyan); font-weight:600;"><i class="fa-solid fa-eye"></i> 0 vues</span>
+        <button class="btn-action primary" onclick="document.getElementById('view-news-modal').classList.remove('active')">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-modal" class="game-modal">
+    <div class="modal-nav">
+      <div id="modal-game-title" style="font-weight:800; font-size:1.2rem;">Jeu</div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-action" onclick="window.likeCurrentGame()"><i class="fa-solid fa-heart" style="color:var(--accent-pink);"></i> <span id="modal-likes">0</span></button>
+        <button class="btn-action" onclick="window.toggleFullscreen()"><i class="fa-solid fa-expand"></i></button>
+        <button class="btn-action" style="background:#ef4444;" onclick="window.closeGameModal()" data-i18n="close">Fermer</button>
+      </div>
+    </div>
+    <div style="padding:10px 25px; background:rgba(0,0,0,0.4); font-size:0.85rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+      <span id="modal-game-desc">Description du jeu...</span>
+      <span id="modal-game-views"><i class="fa-solid fa-eye"></i> 0 vues</span>
+    </div>
+    <div class="modal-body" id="fullscreen-target">
+      <iframe id="game-frame" allow="fullscreen; autoplay; gamepad; microphone; camera; focus-without-user-activation" sandbox="allow-scripts allow-forms allow-modals allow-pointer-lock"></iframe>
+    </div>
+  </div>
+
+  <div id="cloud-preview-modal" class="modal-popup">
+    <div class="popup-box" style="width: 700px; max-width: 90vw;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h3 id="cloud-preview-title"><i class="fa-solid fa-eye"></i> Aperçu du fichier</h3>
+        <button class="btn-icon" onclick="closeCloudPreview()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="cloud-preview-content" style="background:#0b0c16; border:1px solid var(--card-border); border-radius:10px; padding:15px; max-height:450px; overflow:auto; text-align:center;"></div>
+      <div style="display:flex; justify-content:flex-end; margin-top:15px;">
+        <button class="btn-action primary" onclick="closeCloudPreview()" data-i18n="close">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="cloud-folder-modal" class="modal-popup">
+    <div class="popup-box">
+      <h3 style="margin-bottom:15px;"><i class="fa-solid fa-folder-plus"></i> <span data-i18n="new_folder_modal">Nouveau dossier Cloud</span></h3>
+      <div class="form-group">
+        <label data-i18n="folder_name">Nom du dossier</label>
+        <input type="text" id="cloud-folder-input" class="form-input" placeholder="Ex: Documents Projet">
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="btn-action" onclick="closeCloudFolderModal()" data-i18n="cancel">Annuler</button>
+        <button class="btn-action primary" onclick="createCloudFolder()" data-i18n="create">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="share-cloud-modal" class="modal-popup">
+    <div class="popup-box">
+      <h3 style="margin-bottom:15px;"><i class="fa-solid fa-user-plus" style="color:var(--accent-cyan);"></i> Inviter un ami au Cloud d'Équipe</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Entrez le pseudo exact de votre ami (vérification automatique) :</p>
+      <div class="form-group">
+        <label>Pseudo de l'ami (Max 12 car.)</label>
+        <input type="text" id="share-friend-pseudo" class="form-input" placeholder="Ex: Gamer99" maxlength="12">
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:15px;">
+        <button class="btn-action" onclick="document.getElementById('share-cloud-modal').classList.remove('active')">Annuler</button>
+        <button class="btn-action primary" onclick="confirmShareCloud()">Envoyer l'invitation</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="invitations-modal" class="modal-popup">
+    <div class="popup-box" style="width: 440px;">
+      <h3 style="margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+        <i class="fa-solid fa-envelope" style="color:var(--accent-cyan);"></i> Invitations Cloud Reçues
+      </h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Acceptez ou rejetez une invitation pour un Cloud d'Équipe :</p>
+      <div id="invitations-list-container" style="display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto; margin-bottom:20px;"></div>
+      <button class="btn-action primary" style="width:100%; justify-content:center;" onclick="document.getElementById('invitations-modal').classList.remove('active')">Fermer</button>
+    </div>
+  </div>
+
+  <div id="studio-cloud-modal" class="modal-popup">
+    <div class="popup-box">
+      <h3 style="margin-bottom:15px;"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent-cyan);"></i> Enregistrer sur le Cloud</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Choisissez dans quel espace Cloud vous souhaitez sauvegarder votre projet :</p>
+      
+      <div class="form-group">
+        <label>Nom du fichier</label>
+        <input type="text" id="studio-cloud-filename" class="form-input" placeholder="mon-projet.html">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+        <button class="btn-action primary" style="justify-content:center; padding:12px;" onclick="window.saveStudioToCloudTarget('personal')">
+          <i class="fa-solid fa-user"></i> Sauvegarder dans mon Cloud Personnel
+        </button>
+        <button class="btn-action" id="btn-save-shared-cloud" style="justify-content:center; padding:12px; border-color:var(--accent-cyan); display:none;" onclick="window.saveStudioToCloudTarget('shared')">
+          <i class="fa-solid fa-users"></i> Sauvegarder dans le Cloud d'Équipe
+        </button>
+      </div>
+      
+      <button class="btn-action" style="width:100%; justify-content:center; margin-top:15px;" onclick="document.getElementById('studio-cloud-modal').classList.remove('active')">Annuler</button>
+    </div>
+  </div>
+
+  <div id="members-modal" class="modal-popup">
+    <div class="popup-box" style="width: 420px;">
+      <h3 style="margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+        <i class="fa-solid fa-users" style="color:var(--accent-cyan);"></i> Membres du Cloud d'Équipe
+      </h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Liste des participants ayant accès à cet espace :</p>
+      <div id="cloud-members-list" style="display:flex; flex-direction:column; gap:10px; max-height:280px; overflow-y:auto; margin-bottom:20px;"></div>
+      <button class="btn-action primary" style="width:100%; justify-content:center;" onclick="document.getElementById('members-modal').classList.remove('active')">Fermer</button>
+    </div>
+  </div>
+
+  <div id="studio-publish-modal" class="modal-popup">
+    <div class="popup-box">
+      <h2 style="margin-bottom:15px;"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="publish_studio_title">Publier depuis NITFORT Studio</span></h2>
+      <form onsubmit="window.handleStudioPublishSubmit(event)">
+        <div class="form-group">
+          <label data-i18n="game_title">Titre du projet / jeu</label>
+          <input type="text" id="studio-pub-title" class="form-input" placeholder="Nom de votre création" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="game_desc">Description</label>
+          <input type="text" id="studio-pub-desc" class="form-input" placeholder="Courte description" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="cover_img">Image de couverture (Facultatif)</label>
+          <div class="custom-file-btn" onclick="document.getElementById('studio-pub-cover').click()">
+            <i class="fa-solid fa-image"></i> <span id="studio-cover-label" data-i18n="choose_cover">Choisir une image depuis l'appareil</span>
+          </div>
+          <input type="file" id="studio-pub-cover" accept="image/*" style="display:none;" onchange="window.updateFileLabel(this, 'studio-cover-label')">
+        </div>
+        <button type="submit" class="btn-action primary" style="width:100%; justify-content:center; padding:14px; margin-top:10px;" data-i18n="publish_submit">Publier</button>
+      </form>
+      <button class="btn-action" style="width:100%; justify-content:center; margin-top:10px;" onclick="document.getElementById('studio-publish-modal').classList.remove('active')" data-i18n="cancel">Annuler</button>
+    </div>
+  </div>
+
+  <div id="auth-modal" class="modal-popup">
+    <div class="popup-box">
+      <h2 style="margin-bottom:15px;" id="auth-modal-title">Connexion</h2>
+      <div id="auth-error-box" class="error-msg">Message d'erreur</div>
+      <form onsubmit="window.handleAuth(event)">
+        <div class="form-group">
+          <label>Adresse E-mail</label>
+          <input type="email" id="auth-email" class="form-input" required placeholder="nom@exemple.com">
+        </div>
+        <div class="form-group" id="auth-username-group" style="display:none;">
+          <label>Pseudo (Max 12 caractères)</label>
+          <input type="text" id="auth-user" class="form-input" maxlength="12" placeholder="Ex: NITFORT">
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="auth-pass" class="form-input" required minlength="6" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-action primary" style="width:100%; justify-content:center; padding:12px; margin-bottom:10px;" id="auth-submit-btn">Se connecter</button>
+      </form>
+      <button class="btn-action" style="width:100%; justify-content:center; background:rgba(139,92,246,0.2);" onclick="window.toggleAuthMode()" id="auth-switch-btn">Pas de compte ? S'inscrire</button>
+      <button class="btn-action" style="width:100%; justify-content:center; margin-top:10px;" onclick="window.closeAuthModal()">Annuler</button>
+    </div>
+  </div>
+
+  <div id="cgu-modal" class="modal-popup">
+    <div class="popup-box" style="width: 500px;">
+      <h2 style="margin-bottom:15px;"><i class="fa-solid fa-scale-balanced"></i> <span data-i18n="cgu">Conditions d'Utilisation</span></h2>
+      <div style="font-size:0.85rem; color:var(--text-muted); line-height:1.6; max-height:300px; overflow-y:auto; margin-bottom:20px; padding-right:10px;">
+        <p data-i18n="cgu_p1"><strong>1. Droits d'auteur &amp; Conception © :</strong> L'ensemble de la plateforme NITFORT a été conçu avec l'assistance de l'intelligence artificielle Gemini.</p><br>
+        <p data-i18n="cgu_p2"><strong>2. Utilisation :</strong> La plateforme permet la publication et le partage de créations HTML5/JS.</p>
+      </div>
+      <button class="btn-action primary" style="width:100%; justify-content:center;" onclick="window.closeCguModal()" data-i18n="understood">J'ai compris</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, sendEmailVerification, sendPasswordResetEmail, multiFactor, TotpMultiFactorGenerator, TotpSecret, getMultiFactorResolver } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, where, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOX_05RBJJj0J_8TILiEm1-49vWf-cmoU",
+      authDomain: "nitfort.firebaseapp.com",
+      projectId: "nitfort",
+      storageBucket: "nitfort.firebasestorage.app",
+      messagingSenderId: "448178317339",
+      appId: "1:448178317339:web:c3b2e432335c99e581f0be",
+      measurementId: "G-WYPEJZVM8Y"
+    };
+
+    let pendingMfaResolver = null;
+    let pendingTotpSecret = null;
+    let pendingFirebaseTotpSecret = null;
+    let pendingLocalTotpLogin = null;
+    let pendingLocalTotpLoginGate = null;
+    let reportsUnsubscribe = null;
+    window.pendingInterval = null;
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+    window.escapeHTML = escapeHTML;
+
+    function safeAvatarSource(value) {
+      return typeof value === 'string'
+        && value.length <= 1000000
+        && /^data:image\/(?:jpeg|png|webp);base64,[a-z0-9+/]*={0,2}$/i.test(value)
+        ? value
+        : null;
+    }
+    window.safeAvatarSource = safeAvatarSource;
+
+    window.cancelEmailPending = async function() {
+      if (window.pendingInterval) clearInterval(window.pendingInterval);
+      document.getElementById('email-pending-modal').classList.remove('active');
+      if (window.firebaseAuth) await window.signOut(window.firebaseAuth);
+    };
+
+    function isEmailVerificationExpired(lastVerifiedAt) {
+      if (!lastVerifiedAt) return false;
+      const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+      return (Date.now() - lastVerifiedAt) > THIRTY_DAYS_MS;
+    }
+
+    function encodeBase32(bytes) {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+      let output = "";
+      let buffer = 0;
+      let bits = 0;
+      for (const byte of bytes) {
+        buffer = (buffer << 8) | byte;
+        bits += 8;
+        while (bits >= 5) {
+          output += alphabet[(buffer >>> (bits - 5)) & 31];
+          bits -= 5;
+        }
+      }
+      if (bits > 0) output += alphabet[(buffer << (5 - bits)) & 31];
+      return output;
+    }
+
+    function decodeBase32(secret) {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+      const normalized = secret.toUpperCase().replace(/=+$/g, "");
+      const bytes = [];
+      let buffer = 0;
+      let bits = 0;
+      for (const character of normalized) {
+        const value = alphabet.indexOf(character);
+        if (value < 0) throw new Error("Secret TOTP invalide.");
+        buffer = (buffer << 5) | value;
+        bits += 5;
+        if (bits >= 8) {
+          bytes.push((buffer >>> (bits - 8)) & 255);
+          bits -= 8;
+        }
+      }
+      return new Uint8Array(bytes);
+    }
+
+    async function verifyLocalTotp(secret, code) {
+      if (!window.crypto || !window.crypto.subtle) {
+        throw new Error("La vérification TOTP nécessite une page HTTPS.");
+      }
+      const key = await window.crypto.subtle.importKey(
+        "raw",
+        decodeBase32(secret),
+        { name: "HMAC", hash: "SHA-1" },
+        false,
+        ["sign"]
+      );
+      const currentStep = Math.floor(Date.now() / 30000);
+      for (let offset = -1; offset <= 1; offset++) {
+        const counter = currentStep + offset;
+        const message = new ArrayBuffer(8);
+        const view = new DataView(message);
+        view.setUint32(0, Math.floor(counter / 0x100000000));
+        view.setUint32(4, counter >>> 0);
+        const digest = new Uint8Array(await window.crypto.subtle.sign("HMAC", key, message));
+        const position = digest[digest.length - 1] & 15;
+        const binary = ((digest[position] & 127) << 24)
+          | ((digest[position + 1] & 255) << 16)
+          | ((digest[position + 2] & 255) << 8)
+          | (digest[position + 3] & 255);
+        if (String(binary % 1000000).padStart(6, "0") === code) return true;
+      }
+      return false;
+    }
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      window.firebaseAuth = auth;
+      window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+      window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+      window.updateProfile = updateProfile;
+      window.sendEmailVerification = sendEmailVerification;
+      window.sendPasswordResetEmail = sendPasswordResetEmail;
+      window.signOut = signOut;
+
+      window.db = db;
+      window.fsCollection = collection;
+      window.fsAddDoc = addDoc;
+      window.fsGetDocs = getDocs;
+      window.fsQuery = query;
+      window.fsWhere = where;
+      window.fsDoc = doc;
+      window.fsSetDoc = setDoc;
+      window.fsGetDoc = getDoc;
+      window.fsUpdateDoc = updateDoc;
+      window.fsDeleteDoc = deleteDoc;
+      window.fsOnSnapshot = onSnapshot;
+
+      onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          const loginGate = pendingLocalTotpLoginGate;
+          if (loginGate && !(await loginGate.promise)) return;
+          try {
+            await firebaseUser.reload();
+          } catch(e) {}
+          
+          let userDoc = null;
+          try {
+            const snap = await getDoc(doc(db, "users", firebaseUser.uid));
+            if (snap.exists()) userDoc = snap.data();
+          } catch(e) {}
+
+          const nativeTotpEnabled = multiFactor(firebaseUser).enrolledFactors.some(
+            factor => factor.factorId === TotpMultiFactorGenerator.FACTOR_ID
+          );
+          const isAdminAccount = firebaseUser.uid === "P1stm1J2NEbRfRXK1IkIKpAx4gJ3";
+          const localTotpEnabled = Boolean(userDoc && typeof userDoc.totpSecret === "string" && userDoc.totpSecret.length > 0);
+          const totpEnabled = isAdminAccount
+            ? nativeTotpEnabled
+            : nativeTotpEnabled || localTotpEnabled;
+
+          let publicUser = null;
+          const publicUserRef = doc(db, "publicUsers", firebaseUser.uid);
+          const publicUserSnap = await getDoc(publicUserRef);
+          if (publicUserSnap.exists()) {
+            publicUser = publicUserSnap.data();
+          } else {
+            publicUser = {
+              uid: firebaseUser.uid,
+              username: firebaseUser.displayName || (userDoc && userDoc.username) || firebaseUser.email.split('@')[0],
+              avatar: (userDoc && userDoc.avatar) || null,
+              createdAt: (userDoc && userDoc.createdAt) || Date.now(),
+              lastSeen: (userDoc && userDoc.lastSeen) || Date.now(),
+              totpEnabled
+            };
+            await setDoc(publicUserRef, publicUser);
+          }
+
+          const lastVerified = userDoc ? userDoc.lastEmailVerifiedAt : Date.now();
+          if (isEmailVerificationExpired(lastVerified)) {
+            await window.sendEmailVerification(firebaseUser);
+            await window.signOut(auth);
+            window.showNitfortToast("Cela fait plus de 30 jours : un e-mail de re-validation vous a été envoyé.", "error");
+            return;
+          }
+
+          const username = escapeHTML(firebaseUser.displayName || publicUser.username || firebaseUser.email.split('@')[0]);
+
+          window.currentUser = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            username: username,
+            usernameRaw: publicUser.username,
+            avatar: publicUser.avatar || null,
+            isVerified: firebaseUser.emailVerified,
+            totpEnabled
+          };
+          localStorage.setItem('nitfort_user', JSON.stringify({
+            uid: window.currentUser.uid,
+            username: window.currentUser.username,
+            usernameRaw: window.currentUser.usernameRaw,
+            avatar: window.currentUser.avatar,
+            isVerified: window.currentUser.isVerified,
+            totpEnabled: window.currentUser.totpEnabled
+          }));
+          if (typeof startPresenceHeartbeat === 'function') startPresenceHeartbeat();
+          if (typeof syncSharedCloudState === 'function') syncSharedCloudState();
+        } else {
+          window.currentUser = null;
+          localStorage.removeItem('nitfort_user');
+        }
+        if (reportsUnsubscribe) {
+          reportsUnsubscribe();
+          reportsUnsubscribe = null;
+        }
+        const adminHasTotp = firebaseUser
+          && firebaseUser.uid === "P1stm1J2NEbRfRXK1IkIKpAx4gJ3"
+          && multiFactor(firebaseUser).enrolledFactors.some(factor => factor.factorId === TotpMultiFactorGenerator.FACTOR_ID);
+        if (adminHasTotp) {
+          reportsUnsubscribe = onSnapshot(collection(db, "reports"), (snapshot) => {
+            window.reportsList = [];
+            snapshot.forEach((docSnap) => {
+              window.reportsList.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            if (typeof window.renderAdminReports === 'function') window.renderAdminReports();
+          });
+        } else {
+          window.reportsList = [];
+        }
+        if (typeof window.renderUserUI === 'function') window.renderUserUI();
+        if (firebaseUser
+          && firebaseUser.uid === "P1stm1J2NEbRfRXK1IkIKpAx4gJ3"
+          && !adminHasTotp) {
+          window.showNitfortToast("Configure la 2FA Firebase pour activer les droits administrateur.", "error");
+          setTimeout(() => window.setupAuthenticator(), 0);
+        }
+      });
+
+      onSnapshot(collection(db, "games"), (snapshot) => {
+        window.gamesList = [];
+        snapshot.forEach((docSnap) => {
+          window.gamesList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        if (typeof window.renderStore === 'function') window.renderStore();
+        if (typeof window.renderMyGames === 'function') window.renderMyGames();
+      });
+
+      onSnapshot(collection(db, "news"), (snapshot) => {
+        window.firebaseNewsList = [];
+        snapshot.forEach((docSnap) => {
+          window.firebaseNewsList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        if (typeof window.checkNewsBadge === 'function') window.checkNewsBadge();
+        if (typeof window.renderNews === 'function') window.renderNews();
+      });
+
+    } catch(e) {
+      console.error("Erreur d'initialisation Firebase sécurisée:", e);
+    }
+
+    window.handleAuth = async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value.trim();
+      const pass = document.getElementById('auth-pass').value;
+      const username = document.getElementById('auth-user').value.trim();
+      const errBox = document.getElementById('auth-error-box');
+      errBox.style.display = 'none';
+      let loginUserUid = null;
+
+      if (!window.firebaseAuth) {
+        errBox.innerText = "Service d'authentification indisponible.";
+        errBox.style.display = 'block';
+        return;
+      }
+
+      try {
+        if (isRegisterAction) {
+          if (!username) {
+            errBox.innerText = "Veuillez entrer un pseudo !";
+            errBox.style.display = 'block';
+            return;
+          }
+
+          if (username.length > 12) {
+            errBox.innerText = "Le pseudo ne peut pas dépasser 12 caractères !";
+            errBox.style.display = 'block';
+            return;
+          }
+
+          const usersSnap = await window.fsGetDocs(window.fsCollection(window.db, "publicUsers"));
+          let pseudoExists = false;
+          usersSnap.forEach(d => {
+            if (d.data().username && d.data().username.toLowerCase() === username.toLowerCase()) {
+              pseudoExists = true;
+            }
+          });
+
+          if (pseudoExists) {
+            errBox.innerText = "Ce pseudo est déjà utilisé par un autre membre !";
+            errBox.style.display = 'block';
+            return;
+          }
+
+          const res = await window.createUserWithEmailAndPassword(window.firebaseAuth, email, pass);
+          await window.updateProfile(res.user, { displayName: username });
+          await window.sendEmailVerification(res.user);
+
+          await window.fsSetDoc(window.fsDoc(window.db, "users", res.user.uid), {
+            lastEmailVerifiedAt: Date.now()
+          });
+          await window.fsSetDoc(window.fsDoc(window.db, "publicUsers", res.user.uid), {
+            uid: res.user.uid,
+            username: username,
+            avatar: null,
+            createdAt: Date.now(),
+            lastSeen: Date.now(),
+            totpEnabled: false
+          });
+          
+          window.closeAuthModal();
+
+          document.getElementById('email-pending-modal').classList.add('active');
+
+          if (window.pendingInterval) clearInterval(window.pendingInterval);
+          window.pendingInterval = setInterval(async () => {
+            if (window.firebaseAuth.currentUser) {
+              await window.firebaseAuth.currentUser.reload();
+              if (window.firebaseAuth.currentUser.emailVerified) {
+                clearInterval(window.pendingInterval);
+                
+                await window.fsUpdateDoc(window.fsDoc(window.db, "users", res.user.uid), {
+                  lastEmailVerifiedAt: Date.now()
+                });
+
+                document.getElementById('email-pending-modal').classList.remove('active');
+                window.showNitfortToast("E-mail validé avec succès ! Connexion automatique...", "success");
+                window.location.reload();
+              }
+            }
+          }, 3000);
+
+        } else {
+          let resolveLocalTotpGate;
+          const loginGate = {
+            promise: new Promise(resolve => {
+              resolveLocalTotpGate = resolve;
+            }),
+            resolve: value => resolveLocalTotpGate(value)
+          };
+          pendingLocalTotpLoginGate = loginGate;
+
+          const tempRes = await window.signInWithEmailAndPassword(window.firebaseAuth, email, pass);
+          loginUserUid = tempRes.user.uid;
+          if (!tempRes.user.emailVerified) {
+            loginGate.resolve(false);
+            pendingLocalTotpLoginGate = null;
+            await window.signOut(window.firebaseAuth);
+            errBox.innerText = "Veuillez d'abord valider votre adresse e-mail en cliquant sur le lien reçu dans votre boîte mail !";
+            errBox.style.display = 'block';
+            return;
+          }
+
+          const accountSnap = await window.fsGetDoc(window.fsDoc(window.db, "users", tempRes.user.uid));
+          const accountData = accountSnap.exists() ? accountSnap.data() : {};
+          const isAdminAccount = tempRes.user.uid === "P1stm1J2NEbRfRXK1IkIKpAx4gJ3";
+          if (isAdminAccount && !multiFactor(tempRes.user).enrolledFactors.some(
+            factor => factor.factorId === TotpMultiFactorGenerator.FACTOR_ID
+          )) {
+            loginGate.resolve(true);
+            pendingLocalTotpLoginGate = null;
+            window.closeAuthModal();
+            window.showNitfortToast("Active la MFA Firebase pour débloquer les fonctions administrateur.", "error");
+            return;
+          }
+          if (!isAdminAccount && typeof accountData.totpSecret === "string" && accountData.totpSecret.length > 0) {
+            pendingLocalTotpLogin = {
+              uid: tempRes.user.uid,
+              secret: accountData.totpSecret,
+              gate: loginGate
+            };
+            window.closeAuthModal();
+            document.getElementById('login-totp-input').value = '';
+            document.getElementById('login-2fa-modal').classList.add('active');
+            return;
+          }
+
+          loginGate.resolve(true);
+          pendingLocalTotpLoginGate = null;
+          window.showNitfortToast("Connexion réussie !", "success");
+          window.closeAuthModal();
+        }
+      } catch (err) {
+        if (pendingLocalTotpLoginGate) {
+          pendingLocalTotpLoginGate.resolve(false);
+          pendingLocalTotpLoginGate = null;
+        }
+        if (loginUserUid && window.firebaseAuth.currentUser
+          && window.firebaseAuth.currentUser.uid === loginUserUid) {
+          await window.signOut(window.firebaseAuth);
+        }
+        if (err.code === 'auth/multi-factor-auth-required') {
+          try {
+            pendingMfaResolver = getMultiFactorResolver(window.firebaseAuth, err);
+            const totpHint = pendingMfaResolver.hints.find(
+              hint => hint.factorId === TotpMultiFactorGenerator.FACTOR_ID
+            );
+            if (!totpHint) throw new Error("Aucun facteur TOTP compatible n'est configuré pour ce compte.");
+            window.pendingTotpHintUid = totpHint.uid;
+            window.closeAuthModal();
+            document.getElementById('login-totp-input').value = '';
+            document.getElementById('login-2fa-modal').classList.add('active');
+            return;
+          } catch (mfaError) {
+            err = mfaError;
+          }
+        }
+        let msg = err.message;
+        if (err.code === 'auth/invalid-email') msg = "Adresse e-mail invalide ou inexistante.";
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') msg = "E-mail ou mot de passe incorrect.";
+        if (err.code === 'auth/email-already-in-use') msg = "Un compte existe déjà avec cette adresse e-mail !";
+        if (err.code === 'auth/weak-password') msg = "Le mot de passe doit faire au moins 6 caractères.";
+        
+        errBox.innerText = msg;
+        errBox.style.display = 'block';
+      }
+    };
+
+    window.confirmLogin2FA = async function() {
+      const code = document.getElementById('login-totp-input').value.trim();
+      
+      if (!/^\d{6}$/.test(code)) {
+        window.showNitfortToast("Mauvais code ou code expiré : veuillez entrer un code valide à 6 chiffres.", "error");
+        return;
+      }
+
+      if (pendingLocalTotpLogin) {
+        try {
+          if (!(await verifyLocalTotp(pendingLocalTotpLogin.secret, code))) {
+            window.showNitfortToast("Code invalide ou expiré. Réessaie.", "error");
+            return;
+          }
+          const gate = pendingLocalTotpLogin.gate;
+          pendingLocalTotpLogin = null;
+          pendingLocalTotpLoginGate = null;
+          document.getElementById('login-2fa-modal').classList.remove('active');
+          gate.resolve(true);
+          window.showNitfortToast("Code vérifié.", "success");
+        } catch(err) {
+          window.showNitfortToast("Impossible de vérifier le code : " + err.message, "error");
+        }
+        return;
+      }
+
+      if (!pendingMfaResolver || !window.pendingTotpHintUid) {
+        window.showNitfortToast("Session expirée. Veuillez vous reconnecter.", "error");
+        return;
+      }
+
+      try {
+        const assertion = TotpMultiFactorGenerator.assertionForSignIn(window.pendingTotpHintUid, code);
+        await pendingMfaResolver.resolveSignIn(assertion);
+        pendingMfaResolver = null;
+        window.pendingTotpHintUid = null;
+        document.getElementById('login-2fa-modal').classList.remove('active');
+        window.showNitfortToast("Double authentification Firebase validée.", "success");
+        window.location.reload();
+
+      } catch(err) {
+        window.showNitfortToast("Code invalide ou connexion MFA impossible : " + err.message, "error");
+      }
+    };
+
+    window.cancelLogin2FA = async function() {
+      if (pendingLocalTotpLogin) {
+        pendingLocalTotpLogin.gate.resolve(false);
+      }
+      pendingLocalTotpLogin = null;
+      pendingLocalTotpLoginGate = null;
+      pendingMfaResolver = null;
+      window.pendingTotpHintUid = null;
+      document.getElementById('login-2fa-modal').classList.remove('active');
+      if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+        await window.signOut(window.firebaseAuth);
+      }
+    };
+
+    // Dissuade les raccourcis courants d'inspection dans la page principale.
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    }, true);
+
+    document.addEventListener('keydown', function(e) {
+      const key = e.key.toLowerCase();
+      const modifier = e.ctrlKey || e.metaKey;
+      if (key === 'f12' || (modifier && (key === 'u' || (e.shiftKey && ['i', 'j', 'c', 'k'].includes(key))))) {
+        e.preventDefault();
+      }
+    }, true);
+  </script>
+
+  <script>
+    const TRANSLATIONS = {
+      fr: {
+        brand_sub: "WEB GAMING HUB",
+        store: "Boutique & Jeux", library: "Ma Bibliothèque", cloud_nft: "Cloud NFT", upload: "Importer un Jeu", profile: "Mon Profil", settings: "Paramètres App", cgu: "Conditions d'Utilisation",
+        storage_cloud: "Stockage Cloud", rights: "Tous droits réservés.",
+        search_placeholder: "Rechercher un jeu...",
+        hero_tag: "PLATEFORME LIBRE & LIBÉRÉE",
+        hero_title: "Créez, importez et jouez à des jeux web instantanés.",
+        hero_desc: "Le launcher ultime pour publier vos créations et gérer librement vos contenus.",
+        publish_btn: "Publier mon Jeu", studio_btn: "Ouvrir NITFORT Studio", code_studio: "NITFORT Studio",
+        cat_all: "Tous les jeux", cat_pop: "Populaires & Vues", cat_loved: "Les plus aimés", cat_new: "Nouveautés",
+        cloud_explorer: "Cloud NFT - Explorateur Personnel", root: "Racine", import_file: "Importer un Fichier", new_folder: "Nouveau Dossier",
+        news_title: "Actualités & Mises à jour", news_desc: "Retrouvez ici l'historique complet des nouveautés déployées sur NITFORT.",
+        upload_title: "Publier un jeu HTML",
+        game_title: "Titre du jeu", game_desc: "Description", cover_img: "Image de couverture (Facultatif)", choose_cover: "Choisir une image depuis l'appareil",
+        game_file: "Fichier du jeu (.html)", choose_file: "Sélectionner le fichier .html",
+        publish_submit: "Publier", import_btn: "Importer", download_btn: "Télécharger", publish_studio_btn: "Publier",
+        preview_title: "Aperçu du Jeu / Exécution", fullscreen_btn: "Plein Écran",
+        settings_title: "Paramètres de l'application", settings_desc: "Personnalisez votre expérience sur NITFORT :", lang_label: "Langue du site / Website Language",
+        theme_label: "Couleur d'ambiance de la galaxie", auth_title: "Connexion / Inscription", username: "Pseudo", password: "Mot de passe",
+        login_btn: "Se connecter", switch_auth_btn: "Pas de compte ? S'inscrire", cancel: "Annuler", close: "Fermer", understood: "J'ai compris",
+        new_folder_modal: "Nouveau dossier Cloud", folder_name: "Nom du dossier", create: "Créer",
+        publish_studio_title: "Publier depuis NITFORT Studio",
+        cgu_p1: "1. Droits d'auteur & Conception © : L'ensemble de la plateforme NITFORT a été conçu avec l'assistance de l'intelligence artificielle Gemini.",
+        cgu_p2: "2. Utilisation : La plateforme permet la publication et le partage de créations HTML5/JS."
+      },
+      en: {
+        brand_sub: "WEB GAMING HUB",
+        store: "Store & Games", library: "My Library", cloud_nft: "Cloud NFT", upload: "Import Game", profile: "My Profile", settings: "App Settings", cgu: "Terms of Use",
+        storage_cloud: "Cloud Storage", rights: "All rights reserved.",
+        search_placeholder: "Search for a game...",
+        hero_tag: "FREE PLATFORM",
+        hero_title: "Create, import and play instant web games.",
+        hero_desc: "The ultimate launcher to publish your creations.",
+        publish_btn: "Publish my Game", studio_btn: "Open NITFORT Studio", code_studio: "NITFORT Studio",
+        cat_all: "All games", cat_pop: "Popular & Views", cat_loved: "Most Loved", cat_new: "New Releases",
+        cloud_explorer: "Cloud NFT - Personal Explorer", root: "Root", import_file: "Import File", new_folder: "New Folder",
+        news_title: "News & Updates", news_desc: "Find here the complete history of updates deployed on NITFORT.",
+        upload_title: "Publish an HTML Game",
+        game_title: "Game Title", game_desc: "Description", cover_img: "Cover Image (Optional)", choose_cover: "Choose image from device",
+        game_file: "Game File (.html)", choose_file: "Select .html file",
+        publish_submit: "Publish", import_btn: "Import", download_btn: "Download", publish_studio_btn: "Publish",
+        preview_title: "Game Preview / Execution", fullscreen_btn: "Fullscreen",
+        settings_title: "Application Settings", settings_desc: "Customize your experience on NITFORT:", lang_label: "Website Language",
+        theme_label: "Galaxy Ambient Color", auth_title: "Login / Register", username: "Username", password: "Password",
+        login_btn: "Log in", switch_auth_btn: "No account? Register", cancel: "Cancel", close: "Close", understood: "I understand",
+        new_folder_modal: "New Cloud Folder", folder_name: "Folder Name", create: "Create",
+        publish_studio_title: "Publish from NITFORT Studio",
+        cgu_p1: "1. Copyright & Design ©: The NITFORT platform was designed with Gemini assistance.",
+        cgu_p2: "2. Usage: Platform allows sharing HTML5/JS creations."
+      }
+    };
+
+    let currentLang = localStorage.getItem('nitfort_lang') || 'fr';
+    let currentStudioVersion = localStorage.getItem('nitfort_studio_ver') || '1.0.2';
+    let currentUIInterface = localStorage.getItem('nitfort_ui_interface') || 'new';
+
+    function applyTranslations() {
+      const select = document.getElementById('app-lang-select');
+      if(select) select.value = currentLang;
+      const studioSelect = document.getElementById('studio-version-select');
+      if(studioSelect) studioSelect.value = currentStudioVersion;
+      const uiSelect = document.getElementById('ui-interface-select');
+      if(uiSelect) uiSelect.value = currentUIInterface;
+
+      applyUIInterfaceMode();
+
+      const t = TRANSLATIONS[currentLang] || TRANSLATIONS['fr'];
+      
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if(t[key]) {
+          el.innerHTML = t[key];
+        }
+      });
+
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if(t[key]) {
+          el.placeholder = t[key];
+        }
+      });
+
+      updateStudioVersionUI();
+    }
+
+    function applyUIInterfaceMode() {
+      if (currentUIInterface === 'classic') {
+        document.body.classList.add('theme-classic');
+      } else {
+        document.body.classList.remove('theme-classic');
+      }
+    }
+
+    window.changeUIInterface = function(mode) {
+      currentUIInterface = mode;
+      localStorage.setItem('nitfort_ui_interface', mode);
+      applyUIInterfaceMode();
+    };
+
+    function updateStudioVersionUI() {
+      const badge = document.getElementById('studio-badge-ver');
+      if(badge) badge.innerText = `v${currentStudioVersion}`;
+    }
+
+    window.changeStudioVersion = function(ver) {
+      currentStudioVersion = ver;
+      localStorage.setItem('nitfort_studio_ver', ver);
+      updateStudioVersionUI();
+      initStudio();
+    };
+
+    window.currentUser = JSON.parse(localStorage.getItem('nitfort_user')) || null;
+    if (window.currentUser) {
+      delete window.currentUser.email;
+      delete window.currentUser.totpSecret;
+      localStorage.setItem('nitfort_user', JSON.stringify(window.currentUser));
+    }
+    window.persistPublicUser = function() {
+      if (!window.currentUser) return;
+      localStorage.setItem('nitfort_user', JSON.stringify({
+        uid: window.currentUser.uid,
+        username: window.currentUser.username,
+        usernameRaw: window.currentUser.usernameRaw,
+        avatar: window.currentUser.avatar,
+        isVerified: window.currentUser.isVerified,
+        totpEnabled: Boolean(window.currentUser.totpEnabled)
+      }));
+    };
+    window.isNitfortAdmin = function() {
+      return Boolean(window.currentUser
+        && window.currentUser.uid === "P1stm1J2NEbRfRXK1IkIKpAx4gJ3"
+        && window.currentUser.totpEnabled);
+    };
+    window.gamesList = [];
+    window.allCloudItems = [];
+    window.firebaseNewsList = [];
+    window.reportsList = [];
+    window.currentCloudPath = "/";
+    window.cloudMode = "personal";
+    window.sharedCloudOwner = localStorage.getItem('nitfort_shared_cloud_owner') || null;
+    window.sharedCloudOwnerUid = localStorage.getItem('nitfort_shared_cloud_owner_uid') || null;
+    window.sharedMembers = JSON.parse(localStorage.getItem('nitfort_shared_members')) || [];
+    let cloudUnsubscribe = null;
+    let membersUnsubscribe = null;
+    let heartbeatInterval = null;
+
+    let savedStudioCode = localStorage.getItem('nitfort_studio_code') || '';
+    let sessionUserId = localStorage.getItem('nitfort_session_id') || ('user-' + Math.random().toString(36).substring(2));
+    localStorage.setItem('nitfort_session_id', sessionUserId);
+
+    let currentCategory = 'all';
+    let isRegisterAction = false;
+    let currentGameId = null;
+    let codeEditorInstance = null;
+    let currentActiveMode = 'html';
+
+    function checkNewsBadge() {
+      const lastReadCount = parseInt(localStorage.getItem('nitfort_last_read_news_count') || '0', 10);
+      const currentTotal = (window.firebaseNewsList || []).length;
+      const badge = document.getElementById('news-badge');
+      if (!badge) return;
+
+      if (currentTotal > lastReadCount) {
+        badge.innerText = (currentTotal - lastReadCount);
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    window.checkNewsBadge = checkNewsBadge;
+
+    function startPresenceHeartbeat() {
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      const sendHeartbeat = async () => {
+        if (window.currentUser && window.db) {
+          try {
+            await window.fsUpdateDoc(window.fsDoc(window.db, "publicUsers", window.currentUser.uid), {
+              lastSeen: Date.now()
+            });
+          } catch(e) {}
+        }
+      };
+      sendHeartbeat();
+      heartbeatInterval = setInterval(sendHeartbeat, 5000);
+    }
+
+    window.showNitfortToast = function(message, type = 'bot') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `nitfort-toast ${type}`;
+      
+      let iconClass = 'fa-robot';
+      let iconColor = 'var(--accent-purple)';
+      let title = 'Système NITFORT';
+
+      if (type === 'success') {
+        iconClass = 'fa-circle-check';
+        iconColor = 'var(--accent-green)';
+        title = 'Succès';
+      } else if (type === 'error') {
+        iconClass = 'fa-triangle-exclamation';
+        iconColor = '#ef4444';
+        title = 'Alerte';
+      }
+
+      const iconContainer = document.createElement('div');
+      const icon = document.createElement('i');
+      icon.className = `fa-solid ${iconClass}`;
+      icon.style.cssText = `color:${iconColor}; font-size:1.2rem; margin-top:2px;`;
+      iconContainer.appendChild(icon);
+
+      const content = document.createElement('div');
+      content.style.flex = '1';
+      const titleElement = document.createElement('div');
+      titleElement.style.cssText = 'font-weight:700; font-size:0.85rem; margin-bottom:3px; color:#fff;';
+      titleElement.textContent = title;
+      const messageElement = document.createElement('div');
+      messageElement.style.cssText = 'color:var(--text-muted); font-size:0.85rem; line-height:1.4;';
+      messageElement.textContent = String(message);
+      content.append(titleElement, messageElement);
+      toast.append(iconContainer, content);
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'toastSlideOut 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+        setTimeout(() => toast.remove(), 350);
+      }, 4500);
+    };
+
+    function createDefaultAvatar(name) {
+      const avatar = document.createElement('div');
+      avatar.className = 'user-avatar-fallback';
+      avatar.textContent = String(name || 'U').charAt(0).toUpperCase();
+      return avatar;
+    }
+
+    function createDefaultCover(title) {
+      const cleanTitle = (title || 'Jeu').substring(0, 15);
+      const safeXmlTitle = cleanTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200"><rect width="400" height="200" fill="#1e1b4b"/><text x="50%" y="50%" fill="#8b5cf6" font-size="24" font-family="sans-serif" font-weight="bold" dominant-baseline="middle" text-anchor="middle">${safeXmlTitle}</text></svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function compressImage(file, callback) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 450;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          callback(dataUrl);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    window.openReportModal = function() {
+      if (!window.currentUser) {
+        window.openAuthModal();
+        return;
+      }
+      document.getElementById('report-title').value = '';
+      document.getElementById('report-desc').value = '';
+      document.getElementById('report-file-input').value = '';
+      document.getElementById('report-file-label').innerText = 'Ajouter une pièce jointe';
+      document.getElementById('report-modal').classList.add('active');
+    };
+
+    window.handleSendReport = async function(e) {
+      e.preventDefault();
+      if (!window.currentUser) return;
+
+      const title = document.getElementById('report-title').value.trim();
+      const desc = document.getElementById('report-desc').value.trim();
+      const fileInput = document.getElementById('report-file-input');
+
+      const processReport = async function(fileData) {
+        const reportData = {
+          authorUid: window.currentUser.uid,
+          title: title,
+          description: desc,
+          author: window.currentUser.username,
+          authorEmail: window.firebaseAuth.currentUser.email,
+          file: fileData || null,
+          status: "En attente",
+          createdAt: Date.now()
+        };
+
+        if (window.db) {
+          try {
+            await window.fsAddDoc(window.fsCollection(window.db, "reports"), reportData);
+            document.getElementById('report-modal').classList.remove('active');
+            window.showNitfortToast("Signalement envoyé à l'administrateur avec succès !", "success");
+          } catch(err) {
+            window.showNitfortToast("Erreur d'envoi : " + err.message, "error");
+          }
+        }
+      };
+
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        if (file.type.startsWith("image/")) {
+          compressImage(file, function(base64) {
+            processReport({ name: file.name, data: base64, type: "image" });
+          });
+        } else {
+          const reader = new FileReader();
+          reader.onload = function(eFile) {
+            processReport({ name: file.name, data: eFile.target.result, type: "file" });
+          };
+          reader.readAsDataURL(file);
+        }
+      } else {
+        processReport(null);
+      }
+    };
+
+    window.renderAdminReports = function() {
+      const container = document.getElementById('reports-list-container');
+      if (!container) return;
+
+      if (!window.isNitfortAdmin()) {
+        container.innerHTML = `<div style="text-align:center; color:#ef4444; padding:30px;"><i class="fa-solid fa-lock"></i> Accès restreint : Seul l'administrateur NITFORT © peut voir cette catégorie.</div>`;
+        return;
+      }
+
+      (window.reportAttachmentUrls || []).forEach(URL.revokeObjectURL);
+      window.reportAttachmentUrls = [];
+      const list = window.reportsList || [];
+      list.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      if (list.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:30px;">Aucun signalement reçu pour le moment.</div>`;
+        return;
+      }
+
+      container.replaceChildren();
+      list.forEach(item => {
+        const report = document.createElement('article');
+        report.className = 'report-item';
+
+        const header = document.createElement('div');
+        header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;';
+        const title = document.createElement('span');
+        title.style.cssText = 'font-weight:800; color:#fff; font-size:1.05rem;';
+        title.textContent = item.title || 'Signalement';
+        const date = document.createElement('span');
+        date.style.cssText = 'font-size:0.75rem; color:var(--text-muted);';
+        date.textContent = new Date(item.createdAt || Date.now()).toLocaleString('fr-FR');
+        header.append(title, date);
+
+        const author = document.createElement('div');
+        author.style.cssText = 'font-size:0.8rem; color:var(--accent-cyan); margin-bottom:10px;';
+        author.textContent = `De : ${item.author || 'Inconnu'} (${item.authorEmail || 'N/A'})`;
+
+        const description = document.createElement('div');
+        description.style.cssText = 'background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; font-size:0.88rem; line-height:1.5; color:var(--text-main); white-space:pre-wrap;';
+        description.textContent = item.description || '';
+
+        report.append(header, author, description);
+        if (item.file) {
+          const attachment = document.createElement('div');
+          attachment.style.marginTop = '10px';
+          const attachmentLabel = document.createElement('strong');
+          attachmentLabel.textContent = 'Pièce jointe : ';
+          attachment.appendChild(attachmentLabel);
+
+          const dataMatch = typeof item.file.data === 'string'
+            && item.file.data.length <= 900000
+            && /^data:([a-z0-9.+-]+\/[a-z0-9.+-]+);base64,([a-z0-9+/]*={0,2})$/i.exec(item.file.data);
+          if (dataMatch && item.file.name && item.file.name.length <= 180) {
+            try {
+              const mimeType = dataMatch[1].toLowerCase();
+              const bytes = Uint8Array.from(atob(dataMatch[2]), char => char.charCodeAt(0));
+              const url = URL.createObjectURL(new Blob([bytes], { type: mimeType }));
+              window.reportAttachmentUrls.push(url);
+              const safeName = item.file.name.replace(/[\\/:*?"<>|]/g, '_');
+              if (item.file.type === 'image' && ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(mimeType)) {
+                const image = document.createElement('img');
+                image.src = url;
+                image.alt = safeName;
+                image.style.cssText = 'display:block; max-width:100%; max-height:250px; border-radius:8px; margin-top:5px; border:1px solid var(--card-border);';
+                attachment.appendChild(image);
+              } else {
+                const download = document.createElement('a');
+                download.href = url;
+                download.download = safeName;
+                download.textContent = `Télécharger (${safeName})`;
+                download.style.cssText = 'color:var(--accent-cyan); text-decoration:underline; font-size:0.85rem;';
+                attachment.appendChild(download);
+              }
+            } catch(err) {
+              attachment.appendChild(document.createTextNode('Pièce jointe illisible.'));
+            }
+          } else {
+            attachment.appendChild(document.createTextNode('Pièce jointe invalide.'));
+          }
+          report.appendChild(attachment);
+        }
+
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex; justify-content:flex-end; gap:8px; margin-top:12px;';
+        const remove = document.createElement('button');
+        remove.className = 'btn-action';
+        remove.style.cssText = 'background:rgba(239,68,68,0.2); color:#ef4444;';
+        remove.innerHTML = '<i class="fa-solid fa-trash"></i> Supprimer';
+        remove.addEventListener('click', () => window.deleteReportAdmin(item.id));
+        actions.appendChild(remove);
+        report.appendChild(actions);
+        container.appendChild(report);
+      });
+    };
+
+    window.deleteReportAdmin = async function(id) {
+      if (!window.isNitfortAdmin()) return;
+      if (window.db) {
+        try {
+          await window.fsDeleteDoc(window.fsDoc(window.db, "reports", id));
+          window.showNitfortToast("Signalement supprimé.", "success");
+        } catch(e) {
+          window.showNitfortToast("Erreur : " + e.message, "error");
+        }
+      }
+    };
+
+    window.toggleCloudDropdown = function(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('dropdown-options-menu');
+      if (menu) menu.classList.toggle('show');
+    };
+
+    document.addEventListener('click', () => {
+      const menu = document.getElementById('dropdown-options-menu');
+      if (menu) menu.classList.remove('show');
+    });
+
+    window.selectCloudDropdownOption = function(mode) {
+      const optShared = document.getElementById('opt-shared');
+      if (mode === 'shared' && optShared.classList.contains('disabled')) return;
+      window.switchCloudMode(mode);
+    };
+
+    window.openShareCloudModal = function() {
+      if(!window.currentUser) {
+        window.openAuthModal();
+        return;
+      }
+      document.getElementById('share-friend-pseudo').value = '';
+      document.getElementById('share-cloud-modal').classList.add('active');
+    };
+
+    window.confirmShareCloud = async function() {
+      const friendPseudo = document.getElementById('share-friend-pseudo').value.trim();
+      if(!friendPseudo || !window.currentUser) return;
+
+      if(friendPseudo === window.currentUser.username) {
+        window.showNitfortToast("Tu ne peux pas t'inviter toi-même !", "error");
+        return;
+      }
+
+      if (window.db) {
+        try {
+          const usersSnap = await window.fsGetDocs(window.fsCollection(window.db, "publicUsers"));
+          let targetUser = null;
+          usersSnap.forEach(d => {
+            if (d.data().username && d.data().username.toLowerCase() === friendPseudo.toLowerCase()) {
+              targetUser = d.data();
+            }
+          });
+
+          if (!targetUser) {
+            window.showNitfortToast(`Erreur : L'utilisateur "${friendPseudo}" n'existe pas !`, "error");
+            return;
+          }
+          if (targetUser.uid === window.currentUser.uid) {
+            window.showNitfortToast("Tu ne peux pas t'inviter toi-même !", "error");
+            return;
+          }
+
+          const targetOwner = window.sharedCloudOwner || window.currentUser.username;
+          const targetOwnerUid = window.sharedCloudOwnerUid || window.currentUser.uid;
+          const cloudDocRef = window.fsDoc(window.db, "shared_clouds", targetOwnerUid);
+          const currentCloudSnap = await window.fsGetDoc(cloudDocRef);
+          if (!currentCloudSnap.exists()) {
+            if (targetOwnerUid !== window.currentUser.uid) {
+              window.showNitfortToast("Cloud partagé introuvable.", "error");
+              return;
+            }
+            await window.fsSetDoc(cloudDocRef, {
+              owner: targetOwner,
+              ownerUid: window.currentUser.uid,
+              members: [window.currentUser.username],
+              memberUids: [window.currentUser.uid]
+            });
+          }
+
+          const members = currentCloudSnap.exists() ? currentCloudSnap.data().memberUids || [] : [window.currentUser.uid];
+          if (members.includes(targetUser.uid)) {
+            window.showNitfortToast("Cet utilisateur fait déjà partie du cloud.", "error");
+            return;
+          }
+
+          const msgRef = window.fsDoc(window.db, "messages", targetUser.uid + "_" + targetOwnerUid);
+          const existingInvite = await window.fsGetDoc(msgRef);
+          if (existingInvite.exists()) {
+            window.showNitfortToast("Une invitation est déjà en attente pour cet utilisateur.", "error");
+            return;
+          }
+          await window.fsSetDoc(msgRef, {
+            from: window.currentUser.username,
+            fromUid: window.currentUser.uid,
+            to: targetUser.username,
+            toUid: targetUser.uid,
+            owner: targetOwner,
+            ownerUid: targetOwnerUid,
+            type: "cloud_invite",
+            status: "pending",
+            createdAt: Date.now()
+          });
+
+          document.getElementById('share-cloud-modal').classList.remove('active');
+          window.showNitfortToast(`Invitation envoyée à ${friendPseudo} avec succès !`, "success");
+
+        } catch(e) {
+          window.showNitfortToast("Erreur Firestore : " + e.message, "error");
+        }
+      }
+    };
+
+    window.openInvitationsModal = async function() {
+      if(!window.currentUser) {
+        window.openAuthModal();
+        return;
+      }
+      const listEl = document.getElementById("invitations-list-container");
+      if(!listEl) return;
+      listEl.innerHTML = "<div style='color:var(--text-muted); text-align:center;'>Chargement des invitations...</div>";
+      document.getElementById("invitations-modal").classList.add("active");
+
+      if (!window.db) {
+        listEl.innerHTML = "<div style='color:var(--text-muted); text-align:center;'>Aucune invitation reçue.</div>";
+        return;
+      }
+
+      try {
+        const snap = await window.fsGetDocs(window.fsQuery(
+          window.fsCollection(window.db, "messages"),
+          window.fsWhere("toUid", "==", window.currentUser.uid)
+        ));
+        listEl.innerHTML = "";
+        let foundCount = 0;
+
+        snap.forEach(docSnap => {
+          const msg = docSnap.data();
+          if (msg.toUid === window.currentUser.uid && msg.type === "cloud_invite" && msg.status === "pending") {
+            foundCount++;
+            const div = document.createElement("div");
+            div.style.cssText = "display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px 14px; border-radius:10px; font-weight:600; font-size:0.9rem;";
+            const invitationText = document.createElement("span");
+            invitationText.textContent = `Invitation de ${msg.from || "un membre"}`;
+            const actions = document.createElement("div");
+            actions.style.cssText = "display:flex; gap:6px;";
+            const acceptButton = document.createElement("button");
+            acceptButton.className = "btn-action primary";
+            acceptButton.style.cssText = "padding:6px 12px; font-size:0.8rem;";
+            acceptButton.textContent = "Rejoindre";
+            acceptButton.onclick = () => window.acceptCloudInvitation(msg.ownerUid, docSnap.id);
+            const rejectButton = document.createElement("button");
+            rejectButton.className = "btn-action";
+            rejectButton.style.cssText = "padding:6px 10px; font-size:0.8rem; background:rgba(239,68,68,0.2); color:#ef4444; border-color:rgba(239,68,68,0.3);";
+            rejectButton.title = "Rejeter";
+            rejectButton.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            rejectButton.onclick = () => window.rejectCloudInvitation(docSnap.id);
+            actions.append(acceptButton, rejectButton);
+            div.append(invitationText, actions);
+            listEl.appendChild(div);
+          }
+        });
+
+        if (foundCount === 0) {
+          listEl.innerHTML = `<div style="color:var(--text-muted); text-align:center;">Aucune invitation reçue.</div>`;
+        }
+      } catch(e) {
+        const errorMessage = document.createElement('div');
+        errorMessage.style.cssText = 'color:#ef4444; text-align:center;';
+        errorMessage.textContent = `Erreur : ${e.message}`;
+        listEl.replaceChildren(errorMessage);
+      }
+    };
+
+    window.rejectCloudInvitation = async function(msgDocId) {
+      if (!window.db) return;
+      try {
+        await window.fsDeleteDoc(window.fsDoc(window.db, "messages", msgDocId));
+        window.showNitfortToast("Invitation rejetée.", "bot");
+        window.openInvitationsModal();
+        syncSharedCloudState();
+      } catch(e) {
+        window.showNitfortToast("Erreur Firestore : " + e.message, "error");
+      }
+    };
+
+    window.acceptCloudInvitation = async function(ownerUid, msgDocId) {
+      if (!window.currentUser || !window.db) return;
+
+      try {
+        const cloudDocRef = window.fsDoc(window.db, "shared_clouds", ownerUid);
+        const snap = await window.fsGetDoc(cloudDocRef);
+        if (!snap.exists()) {
+          window.showNitfortToast("Invitation ou cloud partagé introuvable.", "error");
+          return;
+        }
+        const inviteRef = window.fsDoc(window.db, "messages", msgDocId);
+        const inviteSnap = await window.fsGetDoc(inviteRef);
+        if (!inviteSnap.exists()
+          || inviteSnap.data().toUid !== window.currentUser.uid
+          || inviteSnap.data().ownerUid !== ownerUid
+          || inviteSnap.data().status !== "pending") {
+          window.showNitfortToast("Cette invitation n'est pas valide.", "error");
+          return;
+        }
+
+        const ownerName = snap.data().owner;
+        const members = snap.data().members || [ownerName];
+        const memberUids = snap.data().memberUids || [snap.data().ownerUid];
+        if (!memberUids.includes(window.currentUser.uid)) {
+          members.push(window.currentUser.username);
+          memberUids.push(window.currentUser.uid);
+          await window.fsUpdateDoc(cloudDocRef, { members, memberUids });
+        }
+
+        if (window.sharedCloudOwner) await window.leaveSharedCloudSilent();
+        await window.fsDeleteDoc(window.fsDoc(window.db, "messages", msgDocId));
+
+        window.sharedCloudOwner = ownerName;
+        window.sharedCloudOwnerUid = ownerUid;
+        window.sharedMembers = members.filter(m => m !== ownerName);
+        localStorage.setItem('nitfort_shared_cloud_owner', window.sharedCloudOwner);
+        localStorage.setItem('nitfort_shared_cloud_owner_uid', window.sharedCloudOwnerUid);
+        localStorage.setItem('nitfort_shared_members', JSON.stringify(window.sharedMembers));
+
+        document.getElementById("invitations-modal").classList.remove("active");
+        window.showNitfortToast(`Tu as rejoint le Cloud d'équipe de ${ownerName} !`, "success");
+        window.switchCloudMode('shared');
+        syncSharedCloudState();
+      } catch(e) {
+        window.showNitfortToast("Erreur Firestore : " + e.message, "error");
+      }
+    };
+
+    window.leaveSharedCloudSilent = async function() {
+      if (!window.sharedCloudOwner || !window.currentUser) return;
+      if (window.db) {
+        try {
+          const docRef = window.fsDoc(window.db, "shared_clouds", window.sharedCloudOwnerUid);
+          const snap = await window.fsGetDoc(docRef);
+          if (snap.exists()) {
+            let data = snap.data();
+            const memberIndex = (data.memberUids || []).indexOf(window.currentUser.uid);
+            if (memberIndex >= 0) {
+              const newMembers = [...(data.members || [])];
+              const newMemberUids = [...data.memberUids];
+              newMembers.splice(memberIndex, 1);
+              newMemberUids.splice(memberIndex, 1);
+              await window.fsUpdateDoc(docRef, { members: newMembers, memberUids: newMemberUids });
+            }
+          }
+        } catch(e) {
+          window.showNitfortToast("Impossible de quitter le cloud partagé : " + e.message, "error");
+          return;
+        }
+      }
+      window.sharedCloudOwner = null;
+      window.sharedCloudOwnerUid = null;
+      window.sharedMembers = [];
+      localStorage.removeItem('nitfort_shared_cloud_owner');
+      localStorage.removeItem('nitfort_shared_cloud_owner_uid');
+      localStorage.removeItem('nitfort_shared_members');
+    };
+
+    window.leaveSharedCloud = async function() {
+      await window.leaveSharedCloudSilent();
+      window.showNitfortToast("Vous avez quitté le Cloud d'équipe.", "bot");
+      window.switchCloudMode('personal');
+      updateCloudModeSelectUI();
+    };
+
+    window.syncSharedCloudState = async function() {
+      if (!window.currentUser || !window.db) return;
+
+      try {
+        const snapClouds = await window.fsGetDocs(window.fsQuery(
+          window.fsCollection(window.db, "shared_clouds"),
+          window.fsWhere("memberUids", "array-contains", window.currentUser.uid)
+        ));
+        let foundOwner = null;
+        let foundOwnerUid = null;
+        let foundMembers = [];
+
+        snapClouds.forEach(docSnap => {
+          const data = docSnap.data();
+          if (data.memberUids && data.memberUids.includes(window.currentUser.uid)) {
+            foundOwner = data.owner;
+            foundOwnerUid = data.ownerUid;
+            foundMembers = data.members.filter(m => m !== data.owner);
+          }
+        });
+
+        if (foundOwner) {
+          window.sharedCloudOwner = foundOwner;
+          window.sharedCloudOwnerUid = foundOwnerUid;
+          window.sharedMembers = foundMembers;
+          localStorage.setItem('nitfort_shared_cloud_owner', foundOwner);
+          localStorage.setItem('nitfort_shared_cloud_owner_uid', foundOwnerUid);
+          localStorage.setItem('nitfort_shared_members', JSON.stringify(foundMembers));
+        } else {
+          window.sharedCloudOwner = null;
+          window.sharedCloudOwnerUid = null;
+          window.sharedMembers = [];
+          localStorage.removeItem('nitfort_shared_cloud_owner');
+          localStorage.removeItem('nitfort_shared_cloud_owner_uid');
+          localStorage.removeItem('nitfort_shared_members');
+        }
+
+        const msgSnap = await window.fsGetDocs(window.fsQuery(
+          window.fsCollection(window.db, "messages"),
+          window.fsWhere("toUid", "==", window.currentUser.uid)
+        ));
+        let unreadCount = 0;
+        msgSnap.forEach(docSnap => {
+          const m = docSnap.data();
+          if (m.toUid === window.currentUser.uid && m.type === "cloud_invite" && m.status === "pending") unreadCount++;
+        });
+
+        const badge = document.getElementById("invitations-badge");
+        if (badge) {
+          if (unreadCount > 0) {
+            badge.innerText = unreadCount;
+            badge.style.display = "inline-block";
+          } else {
+            badge.style.display = "none";
+          }
+        }
+      } catch(e) {
+        window.showNitfortToast("Erreur de synchronisation du cloud partagé : " + e.message, "error");
+      }
+
+      updateCloudModeSelectUI();
+    };
+
+    window.openMembersModal = function() {
+      const listEl = document.getElementById("cloud-members-list");
+      if (!listEl) return;
+      listEl.innerHTML = "<div style='color:var(--text-muted); text-align:center;'>Chargement des membres...</div>";
+
+      document.getElementById("members-modal").classList.add("active");
+
+      if (membersUnsubscribe) {
+        membersUnsubscribe();
+        membersUnsubscribe = null;
+      }
+
+      if (!window.db) return;
+
+      membersUnsubscribe = window.fsOnSnapshot(window.fsCollection(window.db, "publicUsers"), (snapshot) => {
+        let memberNames = [];
+        if (window.sharedCloudOwner) {
+          memberNames = [window.sharedCloudOwner, ...window.sharedMembers];
+        } else if (window.currentUser) {
+          memberNames = [window.currentUser.username];
+        }
+
+        const usersDataMap = {};
+        snapshot.forEach(d => {
+          const u = d.data();
+          if (u.username) usersDataMap[u.username] = u;
+        });
+
+        listEl.innerHTML = "";
+        const now = Date.now();
+
+        memberNames.forEach(name => {
+          const uData = usersDataMap[name] || {};
+          const isOnline = uData.lastSeen && (now - uData.lastSeen < 15000);
+          const avatarSrc = uData.avatar;
+
+          const div = document.createElement("div");
+          div.style.cssText = "display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px 14px; border-radius:10px; font-weight:600; font-size:0.9rem;";
+
+          const memberInfo = document.createElement('span');
+          memberInfo.style.cssText = 'display:flex; align-items:center;';
+          const safeAvatar = window.safeAvatarSource(avatarSrc);
+          if (safeAvatar) {
+            const avatar = document.createElement('img');
+            avatar.src = safeAvatar;
+            avatar.alt = '';
+            avatar.style.cssText = 'width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:10px; border:2px solid var(--accent-primary);';
+            memberInfo.appendChild(avatar);
+          } else {
+            const fallback = document.createElement('span');
+            fallback.className = 'user-avatar-fallback';
+            fallback.style.cssText = 'width:30px; height:30px; font-size:0.8rem; line-height:30px; margin-right:10px;';
+            fallback.textContent = String(name).charAt(0).toUpperCase();
+            memberInfo.appendChild(fallback);
+          }
+          const memberName = document.createElement('span');
+          memberName.textContent = String(name);
+          memberInfo.appendChild(memberName);
+
+          const statusBadge = document.createElement('span');
+          statusBadge.style.cssText = `font-size:0.75rem; color:${isOnline ? 'var(--accent-green)' : 'var(--text-muted)'};`;
+          statusBadge.textContent = isOnline ? '● Connecté' : '● Hors ligne';
+          div.append(memberInfo, statusBadge);
+          listEl.appendChild(div);
+        });
+      }, (error) => {
+        const errorMessage = document.createElement('div');
+        errorMessage.style.cssText = 'color:#ef4444; text-align:center;';
+        errorMessage.textContent = `Erreur : ${error.message}`;
+        listEl.replaceChildren(errorMessage);
+      });
+    };
+
+    function updateCloudModeSelectUI() {
+      const optPersonal = document.getElementById('opt-personal');
+      const optShared = document.getElementById('opt-shared');
+      const textBtn = document.getElementById('dropdown-selected-text');
+      const leaveBtn = document.getElementById('btn-leave-cloud');
+
+      const totalMembers = window.sharedCloudOwner ? window.sharedMembers.length + 1 : 0;
+
+      if (window.sharedCloudOwner) {
+        if (optShared) {
+          optShared.classList.remove('disabled');
+          optShared.innerHTML = `<i class="fa-solid fa-users"></i> Cloud d'Équipe (${totalMembers} membres)`;
+        }
+        if (leaveBtn) leaveBtn.style.display = 'flex';
+      } else {
+        if (optShared) {
+          optShared.classList.add('disabled');
+          optShared.innerHTML = `<i class="fa-solid fa-users"></i> Cloud d'Équipe (Aucun)`;
+        }
+        if (leaveBtn) leaveBtn.style.display = 'none';
+      }
+
+      if (window.cloudMode === 'shared') {
+        if (textBtn) textBtn.innerHTML = `<i class="fa-solid fa-users" style="color:var(--accent-cyan)"></i> Cloud d'Équipe`;
+        if (optPersonal) optPersonal.classList.remove('selected');
+        if (optShared) optShared.classList.add('selected');
+      } else {
+        if (textBtn) textBtn.innerHTML = `<i class="fa-solid fa-user" style="color:var(--accent-cyan)"></i> Cloud Personnel`;
+        if (optPersonal) optPersonal.classList.add('selected');
+        if (optShared) optShared.classList.remove('selected');
+      }
+    }
+
+    window.switchCloudMode = function(mode) {
+      window.cloudMode = mode;
+      const titleEl = document.getElementById('cloud-main-title');
+      if (titleEl) {
+        if (mode === 'shared') {
+          titleEl.innerHTML = `<i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent-cyan);"></i> Cloud d'Équipe`;
+        } else {
+          titleEl.innerHTML = `<i class="fa-solid fa-cloud" style="color:var(--accent-cyan);"></i> Cloud Personnel`;
+        }
+      }
+      window.currentCloudPath = "/";
+      updateCloudModeSelectUI();
+      renderCloudBreadcrumb();
+      setupCloudRealtimeListener();
+    };
+
+    function setupCloudRealtimeListener() {
+      if (!window.currentUser || !window.db) return;
+
+      if (cloudUnsubscribe) {
+        cloudUnsubscribe();
+      }
+
+      const fileCollection = window.fsCollection(window.db, "cloud_files");
+      const snapshots = new Map();
+      const queries = [
+        window.fsQuery(fileCollection, window.fsWhere("ownerUid", "==", window.currentUser.uid))
+      ];
+      if (window.cloudMode === 'shared' && window.sharedCloudOwner) {
+        queries.push(window.fsQuery(fileCollection, window.fsWhere("teamOwner", "==", window.sharedCloudOwnerUid)));
+      }
+
+      const renderCloudSnapshot = () => {
+        const itemsById = new Map();
+        snapshots.forEach(snapshot => {
+          snapshot.forEach(docSnap => itemsById.set(docSnap.id, { ...docSnap.data(), id: docSnap.id }));
+        });
+        const rawItems = Array.from(itemsById.values());
+        window.allCloudItems = [];
+
+        const isPathValid = (item) => {
+          if (item.type === 'folder') return true;
+          let p = item.parentPath || "/";
+          if (p === "/") return true;
+          
+          const segments = p.split("/").filter(Boolean);
+          let currentCheckPath = "";
+          for (let seg of segments) {
+            let parentDir = currentCheckPath;
+            currentCheckPath += "/" + seg;
+            let folderExists = rawItems.some(i => i.type === 'folder' && i.name === seg && (i.parentPath || "/") === (parentDir || "/") && i.cloudScope === item.cloudScope);
+            if (!folderExists) return false;
+          }
+          return true;
+        };
+
+        let personalBytes = 0;
+        let sharedBytes = 0;
+
+        rawItems.forEach((item) => {
+          if (!isPathValid(item)) return;
+
+          const size = Number(item.size || 0);
+
+          if (item.cloudScope === 'personal' && item.owner === (window.currentUser.usernameRaw || window.currentUser.username)) {
+            personalBytes += size;
+          }
+
+          if (window.sharedCloudOwner && item.cloudScope === "shared_" + window.sharedCloudOwner) {
+            sharedBytes += size;
+          }
+
+          if (window.cloudMode === 'shared') {
+            if (window.sharedCloudOwner && item.cloudScope === "shared_" + window.sharedCloudOwner) {
+              window.allCloudItems.push(item);
+            }
+          } else {
+            if (item.cloudScope === 'personal' && item.owner === (window.currentUser.usernameRaw || window.currentUser.username)) {
+              window.allCloudItems.push(item);
+            }
+          }
+        });
+
+        try {
+          if (window.cloudMode === 'shared' && window.sharedCloudOwner) {
+            const totalMembers = window.sharedMembers.length + 1;
+            window.updateStorageUI(sharedBytes, totalMembers * 100, "Stockage Cloud");
+          } else {
+            window.updateStorageUI(personalBytes, 100, "Stockage Cloud");
+          }
+        } catch(err) {}
+
+        window.renderCloudExplorer();
+      };
+
+      const unsubscribers = queries.map((query, index) => window.fsOnSnapshot(
+        query,
+        snapshot => {
+          snapshots.set(index, snapshot);
+          renderCloudSnapshot();
+        },
+        error => window.showNitfortToast("Erreur Cloud : " + error.message, "error")
+      ));
+      cloudUnsubscribe = () => unsubscribers.forEach(unsubscribe => unsubscribe());
+    }
+
+    window.updateStorageUI = function(totalBytes, maxMb = 100, titleText = "Stockage Cloud") {
+      const megaBytes = (totalBytes / (1024 * 1024)).toFixed(2);
+      const percentage = Math.min((megaBytes / maxMb) * 100, 100).toFixed(1);
+
+      const titleEl = document.getElementById("storage-title-txt");
+      const txt = document.getElementById("storage-txt");
+      const fill = document.getElementById("storage-fill");
+
+      if (titleEl) titleEl.innerText = titleText;
+      if (txt) txt.innerText = `${megaBytes} Mo / ${maxMb} Mo`;
+      if (fill) fill.style.width = `${percentage}%`;
+    };
+
+    window.navigateToCloud = function(path) {
+      window.currentCloudPath = path;
+      renderCloudBreadcrumb();
+      renderCloudExplorer();
+    };
+
+    function renderCloudBreadcrumb() {
+      const container = document.getElementById("cloud-breadcrumb");
+      if (!container) return;
+      const parts = window.currentCloudPath.split("/").filter(Boolean);
+
+      container.replaceChildren();
+      const root = document.createElement('span');
+      root.style.cursor = 'pointer';
+      root.innerHTML = '<i class="fa-solid fa-house"></i> Racine';
+      root.onclick = () => window.navigateToCloud('/');
+      container.appendChild(root);
+      let accumulatedPath = "";
+
+      parts.forEach(part => {
+        accumulatedPath += "/" + part;
+        container.appendChild(document.createTextNode(' / '));
+        const pathPart = document.createElement('span');
+        pathPart.style.cursor = 'pointer';
+        pathPart.textContent = part;
+        const path = accumulatedPath;
+        pathPart.onclick = () => window.navigateToCloud(path);
+        container.appendChild(pathPart);
+      });
+    }
+
+    window.renderCloudExplorer = function() {
+      const grid = document.getElementById("cloud-explorer-grid");
+      if (!grid) return;
+      grid.replaceChildren();
+
+      const currentItems = (window.allCloudItems || []).filter(item => (item.parentPath || "/") === window.currentCloudPath);
+
+      if (currentItems.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.style.cssText = 'grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;';
+        emptyState.textContent = 'Ce dossier est vide.';
+        grid.appendChild(emptyState);
+        return;
+      }
+
+      currentItems.forEach(item => {
+        const el = document.createElement("div");
+        el.className = "file-item";
+        const itemName = String(item.name || '');
+        const ownerName = String(item.owner || '');
+        const actions = document.createElement('div');
+        actions.className = 'file-actions';
+        const addActionButton = (title, iconClass, action) => {
+          const button = document.createElement('button');
+          button.className = 'btn-icon';
+          button.title = title;
+          const icon = document.createElement('i');
+          icon.className = `fa-solid ${iconClass}`;
+          button.appendChild(icon);
+          button.onclick = event => action(event, item.id);
+          actions.appendChild(button);
+        };
+
+        if (item.type === "folder") {
+          const icon = document.createElement('i');
+          icon.className = 'fa-solid fa-folder file-icon folder';
+          const name = document.createElement('div');
+          name.className = 'file-name';
+          name.textContent = itemName;
+          const owner = document.createElement('div');
+          owner.style.cssText = 'font-size:0.65rem; color:var(--accent-cyan);';
+          owner.textContent = `Par ${ownerName}`;
+          addActionButton('Supprimer le dossier', 'fa-trash', window.deleteCloudItem);
+          el.append(icon, name, owner, actions);
+          const nextPath = (window.currentCloudPath === "/" ? "" : window.currentCloudPath) + "/" + itemName;
+          el.onclick = () => window.navigateToCloud(nextPath);
+        } else {
+          const sizeKb = ((item.size || 0) / 1024).toFixed(1);
+          let iconClass = "fa-file-code";
+          if (/\.(png|jpg|jpeg|gif|webp)$/i.test(itemName)) iconClass = "fa-file-image";
+          else if (/\.(mp3|wav|ogg)$/i.test(itemName)) iconClass = "fa-file-audio";
+          else if (/\.(mp4|webm|mov)$/i.test(itemName)) iconClass = "fa-file-video";
+          else if (itemName.endsWith(".txt")) iconClass = "fa-file-lines";
+
+          const icon = document.createElement('i');
+          icon.className = `fa-solid ${iconClass} file-icon`;
+          const name = document.createElement('div');
+          name.className = 'file-name';
+          name.textContent = itemName;
+          const size = document.createElement('div');
+          size.className = 'file-size';
+          size.textContent = `${sizeKb} Ko • ${ownerName}`;
+          addActionButton('Lire / Voir le contenu', 'fa-eye', window.previewCloudFile);
+          addActionButton('Éditer dans le Studio', 'fa-code', window.editCloudFileInStudio);
+          addActionButton('Télécharger', 'fa-download', window.downloadCloudFile);
+          addActionButton('Supprimer', 'fa-trash', window.deleteCloudItem);
+          el.append(icon, name, size, actions);
+        }
+
+        grid.appendChild(el);
+      });
+    };
+
+    window.openCloudFolderModal = function() {
+      document.getElementById("cloud-folder-modal").classList.add("active");
+    };
+
+    window.closeCloudFolderModal = function() {
+      document.getElementById("cloud-folder-modal").classList.remove("active");
+      document.getElementById("cloud-folder-input").value = "";
+    };
+
+    window.handleCloudFileUpload = function(input) {
+      const file = input.files[0];
+      if (!file || !window.currentUser) return;
+
+      const scope = (window.cloudMode === 'shared' && window.sharedCloudOwner) ? "shared_" + window.sharedCloudOwner : "personal";
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const fileData = {
+          name: file.name,
+          type: "file",
+          owner: window.currentUser.usernameRaw || window.currentUser.username,
+          ownerUid: window.currentUser.uid,
+          teamOwner: window.cloudMode === 'shared' ? window.sharedCloudOwnerUid : null,
+          cloudScope: scope,
+          size: file.size,
+          content: e.target.result,
+          parentPath: window.currentCloudPath,
+          createdAt: Date.now()
+        };
+
+        if (window.db) {
+          try {
+            await window.fsAddDoc(window.fsCollection(window.db, "cloud_files"), fileData);
+            window.showNitfortToast("Fichier importé avec succès !", "success");
+          } catch (err) {
+            window.showNitfortToast("Erreur d'import : " + err.message, "error");
+          }
+        }
+        input.value = "";
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.openStudioCloudSaveModal = function() {
+      if (!window.currentUser) {
+        window.openAuthModal();
+        return;
+      }
+      document.getElementById('studio-cloud-filename').value = "mon-projet-" + Date.now().toString().slice(-4) + ".html";
+      
+      const btnShared = document.getElementById('btn-save-shared-cloud');
+      if (btnShared) {
+        if (window.sharedCloudOwner) {
+          btnShared.style.display = 'flex';
+        } else {
+          btnShared.style.display = 'none';
+        }
+      }
+
+      document.getElementById('studio-cloud-modal').classList.add('active');
+    };
+
+    window.saveStudioToCloudTarget = async function(targetType) {
+      const filename = document.getElementById('studio-cloud-filename').value.trim() || "projet-studio.html";
+      const codeContent = codeEditorInstance ? codeEditorInstance.getValue() : "";
+      
+      if (!codeContent) {
+        window.showNitfortToast("Le code est vide !", "error");
+        return;
+      }
+
+      const blob = new Blob([codeContent], { type: 'text/html' });
+      const scope = (targetType === 'shared' && window.sharedCloudOwner) ? "shared_" + window.sharedCloudOwner : "personal";
+
+      const fileData = {
+        name: filename.endsWith('.html') ? filename : filename + '.html',
+        type: "file",
+        owner: window.currentUser.usernameRaw || window.currentUser.username,
+        ownerUid: window.currentUser.uid,
+        teamOwner: targetType === 'shared' ? window.sharedCloudOwnerUid : null,
+        cloudScope: scope,
+        size: blob.size,
+        content: codeContent,
+        parentPath: "/",
+        createdAt: Date.now()
+      };
+
+      document.getElementById('studio-cloud-modal').classList.remove('active');
+
+      if (window.db) {
+        try {
+          await window.fsAddDoc(window.fsCollection(window.db, "cloud_files"), fileData);
+          window.showNitfortToast("Projet enregistré sur le Cloud avec succès !", "success");
+        } catch(e) {
+          window.showNitfortToast("Erreur d'enregistrement : " + e.message, "error");
+        }
+      }
+    };
+
+    window.closeCloudPreview = function() {
+      const contentEl = document.getElementById("cloud-preview-content");
+      if (contentEl) contentEl.innerHTML = "";
+      document.getElementById("cloud-preview-modal").classList.remove('active');
+    };
+
+    window.previewCloudFile = function(e, id) {
+      e.stopPropagation();
+      const item = (window.allCloudItems || []).find(i => i.id === id);
+      if (!item || !item.content) return;
+
+      const titleEl = document.getElementById("cloud-preview-title");
+      const contentEl = document.getElementById("cloud-preview-content");
+
+      titleEl.innerHTML = `<i class="fa-solid fa-eye"></i> Aperçu : ${window.escapeHTML(item.name)}`;
+
+      if (item.name.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
+        contentEl.innerHTML = `<img src="${item.content}" style="max-width:100%; max-height:400px; border-radius:8px; object-fit:contain;" loading="lazy">`;
+        document.getElementById("cloud-preview-modal").classList.add('active');
+        return;
+      } else if (item.name.match(/\.(mp3|wav|ogg)$/i)) {
+        contentEl.innerHTML = `<div style="padding:20px;"><audio controls autoplay style="width:100%;"><source src="${item.content}"></audio></div>`;
+        document.getElementById("cloud-preview-modal").classList.add('active');
+        return;
+      } else if (item.name.match(/\.(mp4|webm|mov)$/i)) {
+        contentEl.innerHTML = `<video controls autoplay style="max-width:100%; max-height:450px; border-radius:8px;"><source src="${item.content}"></video>`;
+        document.getElementById("cloud-preview-modal").classList.add('active');
+        return;
+      }
+
+      let fileCode = item.content;
+      if (fileCode.startsWith("data:")) {
+        const base64Part = fileCode.split(",")[1];
+        try {
+          const binString = atob(base64Part);
+          const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+          fileCode = new TextDecoder("utf-8").decode(bytes);
+        } catch(err) {
+          try {
+            fileCode = decodeURIComponent(escape(atob(base64Part)));
+          } catch(e) {
+            fileCode = atob(base64Part);
+          }
+        }
+      }
+
+      contentEl.innerHTML = `<pre style="text-align:left; color:#f3f4f6; font-family:'Fira Code', monospace; font-size:0.85rem; white-space:pre-wrap; word-break:break-all;">${window.escapeHTML(fileCode)}</pre>`;
+      document.getElementById("cloud-preview-modal").classList.add('active');
+    };
+
+    window.editCloudFileInStudio = function(e, id) {
+      e.stopPropagation();
+      const item = (window.allCloudItems || []).find(i => i.id === id);
+      if (!item || !item.content) return;
+      let fileCode = item.content;
+      if (fileCode.startsWith("data:")) {
+        const base64Part = fileCode.split(",")[1];
+        try {
+          const binString = atob(base64Part);
+          const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+          fileCode = new TextDecoder("utf-8").decode(bytes);
+        } catch(err) {
+          fileCode = atob(base64Part);
+        }
+      }
+      savedStudioCode = fileCode;
+      localStorage.setItem('nitfort_studio_code', savedStudioCode);
+      window.showPage('code-studio');
+      if (codeEditorInstance) codeEditorInstance.setValue(savedStudioCode);
+    };
+
+    window.deleteCloudItem = async function(e, id) {
+      e.stopPropagation();
+      const itemToDelete = (window.allCloudItems || []).find(i => i.id === id);
+      if (!itemToDelete) return;
+
+      if (window.db) {
+        try {
+          if (itemToDelete.type === 'folder') {
+            const folderBasePath = (window.currentCloudPath === '/' ? '' : window.currentCloudPath) + '/' + itemToDelete.name;
+            const batchPromises = [];
+
+            (window.allCloudItems || []).forEach((data) => {
+              const pPath = data.parentPath || "/";
+              
+              if (pPath === folderBasePath || pPath.startsWith(folderBasePath + '/')) {
+                batchPromises.push(window.fsDeleteDoc(window.fsDoc(window.db, "cloud_files", data.id)));
+              }
+            });
+
+            await Promise.all(batchPromises);
+          }
+
+          await window.fsDeleteDoc(window.fsDoc(window.db, "cloud_files", id));
+          window.showNitfortToast("Élément supprimé avec succès.", "success");
+        } catch(err) {
+          window.showNitfortToast("Erreur de suppression : " + err.message, "error");
+        }
+      }
+    };
+
+    window.createCloudFolder = async function() {
+      const name = document.getElementById("cloud-folder-input").value.trim();
+      if (!name || !window.currentUser) return;
+
+      const scope = (window.cloudMode === 'shared' && window.sharedCloudOwner) ? "shared_" + window.sharedCloudOwner : "personal";
+
+      const newFolder = {
+        name: name,
+        type: "folder",
+        owner: window.currentUser.usernameRaw || window.currentUser.username,
+        ownerUid: window.currentUser.uid,
+        teamOwner: window.cloudMode === 'shared' ? window.sharedCloudOwnerUid : null,
+        cloudScope: scope,
+        parentPath: window.currentCloudPath,
+        createdAt: Date.now()
+      };
+
+      window.closeCloudFolderModal();
+
+      if (window.db) {
+        try {
+          await window.fsAddDoc(window.fsCollection(window.db, "cloud_files"), newFolder);
+          window.showNitfortToast("Dossier créé avec succès !", "success");
+        } catch(e){
+          window.showNitfortToast("Erreur : " + e.message, "error");
+        }
+      }
+    };
+
+    window.downloadCloudFile = function(e, id) {
+      e.stopPropagation();
+      const item = (window.allCloudItems || []).find(i => i.id === id);
+      if (!item || !item.content) return;
+
+      const a = document.createElement("a");
+      a.href = item.content.startsWith("data:") ? item.content : 'data:text/plain;charset=utf-8,' + encodeURIComponent(item.content);
+      a.download = item.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    window.checkEmailVerificationStatus = async function() {
+      if (!window.firebaseAuth || !window.firebaseAuth.currentUser) {
+        window.showNitfortToast("Veuillez vous connecter d'abord pour valider l'e-mail.", "error");
+        window.openAuthModal();
+        return;
+      }
+      try {
+        await window.firebaseAuth.currentUser.reload();
+        const isVerified = window.firebaseAuth.currentUser.emailVerified;
+        window.currentUser.isVerified = isVerified;
+        window.persistPublicUser();
+        renderUserUI();
+        renderProfile();
+        if (isVerified) {
+          if (window.pendingInterval) clearInterval(window.pendingInterval);
+          document.getElementById('email-pending-modal').classList.remove('active');
+          window.showNitfortToast("Compte certifié et connecté avec succès !", "success");
+          window.showPage('store');
+        } else {
+          window.showNitfortToast("L'e-mail n'a pas encore été validé. Cliquez sur le lien dans votre boîte mail !", "error");
+        }
+      } catch(err) {
+        window.showNitfortToast("Erreur : " + err.message, "error");
+      }
+    };
+
+    window.sendVerificationEmailOnly = async function() {
+      if (!window.firebaseAuth || !window.firebaseAuth.currentUser) return;
+      try {
+        await window.sendEmailVerification(window.firebaseAuth.currentUser);
+        window.showNitfortToast("E-mail de certification renvoyé !", "success");
+      } catch(err) {
+        window.showNitfortToast("Erreur : " + err.message, "error");
+      }
+    };
+
+    window.requestPasswordReset = async function() {
+      const email = window.firebaseAuth && window.firebaseAuth.currentUser
+        ? window.firebaseAuth.currentUser.email
+        : null;
+      if (!email) {
+        window.showNitfortToast("Aucun e-mail associé à ce compte.", "error");
+        return;
+      }
+      if (!window.sendPasswordResetEmail) {
+        window.showNitfortToast("Service de réinitialisation indisponible.", "error");
+        return;
+      }
+      try {
+        await window.sendPasswordResetEmail(window.firebaseAuth, email);
+        window.showNitfortToast("Un e-mail de réinitialisation de mot de passe vient de vous être envoyé !", "success");
+      } catch(err) {
+        window.showNitfortToast("Erreur : " + err.message, "error");
+      }
+    };
+
+    window.setupAuthenticator = async function() {
+      if (!window.currentUser) {
+        window.openAuthModal();
+        return;
+      }
+      try {
+        const user = window.firebaseAuth.currentUser;
+        if (!user) throw new Error("Reconnecte-toi avant de configurer la double authentification.");
+        const isAdminAccount = user.uid === "P1stm1J2NEbRfRXK1IkIKpAx4gJ3";
+        const nativeTotpEnabled = multiFactor(user).enrolledFactors.some(
+          factor => factor.factorId === TotpMultiFactorGenerator.FACTOR_ID
+        );
+        if (nativeTotpEnabled || (!isAdminAccount && window.currentUser.totpEnabled)) {
+          window.showNitfortToast("Une application TOTP est déjà associée à ce compte.", "bot");
+          return;
+        }
+        if (typeof window.QRCode !== 'function') {
+          throw new Error("La bibliothèque locale de QR code n'est pas chargée.");
+        }
+
+        let qrCodeUrl;
+        if (isAdminAccount) {
+          const session = await multiFactor(user).getSession();
+          pendingFirebaseTotpSecret = await TotpSecret.generate(session);
+          pendingTotpSecret = null;
+          qrCodeUrl = pendingFirebaseTotpSecret.generateQrCodeUrl(user.email, "NITFORT");
+          document.getElementById('totp-setup-description').textContent =
+            "Compte administrateur : Firebase vérifiera ce code à chaque connexion et dans les règles Firestore.";
+        } else {
+          const secretBytes = window.crypto.getRandomValues(new Uint8Array(20));
+          pendingTotpSecret = encodeBase32(secretBytes);
+          pendingFirebaseTotpSecret = null;
+          const label = encodeURIComponent("NITFORT:" + user.email);
+          qrCodeUrl = `otpauth://totp/${label}?secret=${pendingTotpSecret}&issuer=NITFORT&algorithm=SHA1&digits=6&period=30`;
+          document.getElementById('totp-setup-description').textContent =
+            "Pour les comptes non administrateurs, ce code est vérifié par le site et n’est pas une protection MFA imposée par Firebase.";
+        }
+        const qrContainer = document.getElementById('qrcode-container');
+        qrContainer.replaceChildren();
+        new window.QRCode(qrContainer, {
+          text: qrCodeUrl,
+          width: 160,
+          height: 160,
+          correctLevel: window.QRCode.CorrectLevel.M
+        });
+        document.getElementById('auth-totp-code').value = '';
+        document.getElementById('authenticator-modal').classList.add('active');
+      } catch(err) {
+        window.showNitfortToast("Impossible de préparer le code TOTP : " + err.message, "error");
+      }
+    };
+
+    window.verifyAndEnableAuthenticator = async function() {
+      const code = document.getElementById('auth-totp-code').value.trim();
+      if (!/^\d{6}$/.test(code)) {
+        window.showNitfortToast("Veuillez entrer un code valide à 6 chiffres.", "error");
+        return;
+      }
+
+      if ((!pendingTotpSecret && !pendingFirebaseTotpSecret) || !window.firebaseAuth.currentUser) {
+        window.showNitfortToast("Configuration expirée. Recommence la procédure.", "error");
+        return;
+      }
+
+      try {
+        const user = window.firebaseAuth.currentUser;
+        if (user.uid === "P1stm1J2NEbRfRXK1IkIKpAx4gJ3") {
+          if (!pendingFirebaseTotpSecret) throw new Error("La configuration MFA Firebase a expiré.");
+          const assertion = TotpMultiFactorGenerator.assertionForEnrollment(pendingFirebaseTotpSecret, code);
+          await multiFactor(user).enroll(assertion, "NITFORT Authenticator");
+          pendingFirebaseTotpSecret = null;
+          pendingTotpSecret = null;
+          document.getElementById('authenticator-modal').classList.remove('active');
+          window.showNitfortToast("MFA Firebase activée. Reconnecte-toi avec ton code pour protéger l’administration.", "success");
+          await signOut(window.firebaseAuth);
+          window.location.reload();
+          return;
+        }
+
+        if (!pendingTotpSecret || !(await verifyLocalTotp(pendingTotpSecret, code))) {
+          window.showNitfortToast("Code invalide. Vérifie l'heure de ton téléphone et réessaie.", "error");
+          return;
+        }
+        await window.fsSetDoc(window.fsDoc(window.db, "users", user.uid), {
+          totpSecret: pendingTotpSecret,
+          totpEnabled: true
+        }, { merge: true });
+        window.currentUser.totpEnabled = true;
+        window.persistPublicUser();
+        pendingTotpSecret = null;
+        document.getElementById('authenticator-modal').classList.remove('active');
+        window.showNitfortToast("Code TOTP activé pour ce compte.", "success");
+        renderUserUI();
+      } catch(err) {
+        window.showNitfortToast("Impossible d'activer le code TOTP : " + err.message, "error");
+      }
+    };
+
+    window.changeAppLanguage = function(newLang) {
+      currentLang = newLang;
+      localStorage.setItem('nitfort_lang', newLang);
+      applyTranslations();
+      renderUserUI();
+      if(typeof window.renderStore === 'function') window.renderStore();
+    };
+
+    window.showCguModal = function() { document.getElementById('cgu-modal').classList.add('active'); };
+    window.closeCguModal = function() { document.getElementById('cgu-modal').classList.remove('active'); };
+
+    window.showPage = async function(pageId, element = null) {
+      if (pageId === 'cloud-nft' && !window.currentUser) {
+        window.openAuthModal();
+        return;
+      }
+
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+      const target = document.getElementById(`page-${pageId}`);
+      if(target) target.classList.add('active');
+      if(element) element.classList.add('active');
+
+      if(pageId === 'store') window.renderStore();
+      if(pageId === 'my-games') window.renderMyGames();
+      if(pageId === 'cloud-nft') {
+        await syncSharedCloudState();
+        renderCloudBreadcrumb();
+        setupCloudRealtimeListener();
+      } else {
+        if (cloudUnsubscribe) {
+          cloudUnsubscribe();
+          cloudUnsubscribe = null;
+        }
+      }
+      if(pageId === 'profile') renderProfile();
+      if(pageId === 'admin-reports') window.renderAdminReports();
+      if(pageId === 'news') {
+        localStorage.setItem('nitfort_last_read_news_count', (window.firebaseNewsList || []).length);
+        const badge = document.getElementById('news-badge');
+        if(badge) badge.style.display = 'none';
+        window.renderNews();
+      }
+      if(pageId === 'code-studio') initStudio();
+    };
+
+    window.openPublishNewsModal = function() {
+      if (!window.isNitfortAdmin()) return;
+      document.getElementById('news-modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Publier une Actualité / Annonce`;
+      document.getElementById('news-edit-id').value = '';
+      document.getElementById('news-pub-title').value = '';
+      document.getElementById('news-pub-category').value = 'Mise à jour';
+      document.getElementById('news-wysiwyg-editor').innerHTML = '';
+      document.getElementById('publish-news-modal').classList.add('active');
+    };
+
+    window.openEditNewsModal = function(e, newsId) {
+      e.stopPropagation();
+      if (!window.isNitfortAdmin()) return;
+      const item = (window.firebaseNewsList || []).find(n => n.id === newsId);
+      if (!item) return;
+
+      document.getElementById('news-modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Modifier l'Actualité`;
+      document.getElementById('news-edit-id').value = item.id;
+      document.getElementById('news-pub-title').value = item.title;
+      document.getElementById('news-pub-category').value = item.category;
+      document.getElementById('news-wysiwyg-editor').innerHTML = item.content;
+      document.getElementById('publish-news-modal').classList.add('active');
+    };
+
+    window.deleteNewsAdmin = async function(e, newsId) {
+      e.stopPropagation();
+      if (!window.isNitfortAdmin()) return;
+      if (window.db) {
+        try {
+          await window.fsDeleteDoc(window.fsDoc(window.db, "news", newsId));
+          window.showNitfortToast("Actualité supprimée avec succès.", "success");
+        } catch(err) {
+          window.showNitfortToast("Erreur de suppression : " + err.message, "error");
+        }
+      }
+    };
+
+    window.execEditorCmd = function(cmd, arg = null) {
+      document.execCommand(cmd, false, arg);
+    };
+
+    window.insertImageIntoNewsEditor = function(input) {
+      const file = input.files[0];
+      if (!file) return;
+      compressImage(file, function(base64) {
+        execEditorCmd('insertImage', base64);
+      });
+    };
+
+    window.handlePublishNewsSubmit = async function(e) {
+      e.preventDefault();
+      if (!window.isNitfortAdmin()) {
+        window.showNitfortToast("Accès refusé : Seul l'administrateur NITFORT © peut publier des actualités.", "error");
+        return;
+      }
+
+      const editId = document.getElementById('news-edit-id').value;
+      const title = document.getElementById('news-pub-title').value.trim();
+      const category = document.getElementById('news-pub-category').value.trim();
+      const htmlContent = document.getElementById('news-wysiwyg-editor').innerHTML;
+
+      if (window.db) {
+        try {
+          if (editId) {
+            await window.fsUpdateDoc(window.fsDoc(window.db, "news", editId), {
+              title: title,
+              category: category,
+              content: htmlContent
+            });
+            window.showNitfortToast("Actualité modifiée avec succès !", "success");
+          } else {
+            const newNews = {
+              title: title,
+              category: category,
+              content: htmlContent,
+              date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+              views: 0,
+              viewers: [],
+              createdAt: Date.now()
+            };
+            await window.fsAddDoc(window.fsCollection(window.db, "news"), newNews);
+            window.showNitfortToast("Actualité publiée avec succès !", "success");
+          }
+          document.getElementById('publish-news-modal').classList.remove('active');
+        } catch(err) {
+          window.showNitfortToast("Erreur Firestore : " + err.message, "error");
+        }
+      }
+    };
+
+    window.openNewsDetailModal = async function(newsId) {
+      const allNews = window.firebaseNewsList || [];
+      const item = allNews.find(n => n.id === newsId);
+      if (!item) return;
+
+      document.getElementById('view-news-title').innerText = item.title;
+      document.getElementById('view-news-category').innerText = item.category;
+      document.getElementById('view-news-date').innerText = item.date;
+      document.getElementById('view-news-content').innerHTML = item.content;
+      
+      let viewsCount = item.views || 0;
+      let viewers = item.viewers || [];
+      
+      const viewerId = window.currentUser ? window.currentUser.username : sessionUserId;
+
+      if (!viewers.includes(viewerId)) {
+        viewers.push(viewerId);
+        viewsCount += 1;
+        if (window.db && item.id) {
+          try {
+            await window.fsUpdateDoc(window.fsDoc(window.db, "news", item.id), {
+              views: viewsCount,
+              viewers: viewers
+            });
+          } catch(e) {}
+        }
+      }
+
+      document.getElementById('view-news-views-count').innerHTML = `<i class="fa-solid fa-eye"></i> ${viewsCount} personne(s) ont lu`;
+      document.getElementById('view-news-modal').classList.add('active');
+    };
+
+    window.renderNews = function() {
+      const container = document.getElementById('news-container');
+      const adminBtn = document.getElementById('btn-admin-add-news');
+
+      if (adminBtn) {
+        if (window.isNitfortAdmin()) {
+          adminBtn.style.display = "flex";
+        } else {
+          adminBtn.style.display = "none";
+        }
+      }
+
+      if(!container) return;
+
+      const newsToRender = window.firebaseNewsList || [];
+      newsToRender.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      if (newsToRender.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:30px;">Aucune actualité pour le moment.</div>`;
+        return;
+      }
+
+      const isAdmin = window.isNitfortAdmin();
+
+      container.replaceChildren();
+      newsToRender.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'news-card';
+        card.onclick = () => window.openNewsDetailModal(item.id);
+
+        const header = document.createElement('div');
+        header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;';
+        const category = document.createElement('span');
+        category.style.cssText = 'background:var(--accent-primary); color:white; font-size:0.7rem; font-weight:800; padding:3px 8px; border-radius:6px;';
+        category.textContent = String(item.category || '');
+        const metadata = document.createElement('div');
+        metadata.style.cssText = 'display:flex; align-items:center; gap:10px;';
+        const date = document.createElement('span');
+        date.style.cssText = 'font-size:0.8rem; color:var(--text-muted);';
+        date.textContent = String(item.date || '');
+        metadata.appendChild(date);
+
+        if (isAdmin) {
+          const actions = document.createElement('div');
+          actions.style.cssText = 'display:flex; gap:6px;';
+          const editButton = document.createElement('button');
+          editButton.className = 'btn-icon';
+          editButton.title = "Modifier l'actu";
+          editButton.innerHTML = '<i class="fa-solid fa-pen"></i>';
+          editButton.onclick = event => window.openEditNewsModal(event, item.id);
+          const deleteButton = document.createElement('button');
+          deleteButton.className = 'btn-icon';
+          deleteButton.style.background = '#ef4444';
+          deleteButton.title = "Supprimer l'actu";
+          deleteButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
+          deleteButton.onclick = event => window.deleteNewsAdmin(event, item.id);
+          actions.append(editButton, deleteButton);
+          metadata.appendChild(actions);
+        }
+        header.append(category, metadata);
+
+        const title = document.createElement('h3');
+        title.style.cssText = 'margin-bottom:8px; font-size:1.1rem; font-weight:700; color:#fff;';
+        title.textContent = String(item.title || '');
+        const footer = document.createElement('div');
+        footer.style.cssText = 'color:var(--text-muted); font-size:0.85rem; display:flex; justify-content:space-between; align-items:center; margin-top:12px;';
+        const hint = document.createElement('span');
+        hint.textContent = 'Cliquer pour lire le contenu complet...';
+        const views = document.createElement('span');
+        views.style.cssText = 'color:var(--accent-cyan); font-weight:600;';
+        views.innerHTML = '<i class="fa-solid fa-eye"></i> ';
+        views.appendChild(document.createTextNode(String(Number(item.views) || 0)));
+        footer.append(hint, views);
+
+        card.append(header, title, footer);
+        container.appendChild(card);
+      });
+    };
+
+    window.renderUserUI = function() {
+      const sidebarUser = document.getElementById('sidebar-user-info');
+      const topUser = document.getElementById('top-user-btn');
+      const menuCloud = document.getElementById('menu-cloud-item');
+      const menuReports = document.getElementById('menu-reports-item');
+      const storageBox = document.getElementById('sidebar-storage-box');
+
+      if(window.currentUser) {
+        if (menuCloud) menuCloud.style.display = 'flex';
+        if (storageBox) storageBox.style.display = 'block';
+
+        if (menuReports) {
+          if (window.isNitfortAdmin()) {
+            menuReports.style.display = 'flex';
+          } else {
+            menuReports.style.display = 'none';
+          }
+        }
+
+        const verifiedHtml = window.currentUser.isVerified ? `<span class="verified-badge" title="Compte certifié"><i class="fa-solid fa-check"></i></span>` : '';
+
+        sidebarUser.innerHTML = '';
+        
+        const avatarContainer = document.createElement('div');
+        avatarContainer.style.cursor = 'pointer';
+        avatarContainer.onclick = () => window.showPage('profile');
+        const avatarSource = window.safeAvatarSource(window.currentUser.avatar);
+        if (avatarSource) {
+          const imgEl = document.createElement('img');
+          imgEl.src = avatarSource;
+          imgEl.className = 'user-avatar-img';
+          avatarContainer.appendChild(imgEl);
+        } else {
+          avatarContainer.appendChild(createDefaultAvatar(window.currentUser.username));
+        }
+        
+        const divEl = document.createElement('div');
+        divEl.innerHTML = `<div style="font-weight:700; font-size:0.85rem; display:flex; align-items:center;">${window.escapeHTML(window.currentUser.username)}${verifiedHtml}</div><div style="font-size:0.7rem; color:var(--accent-green);">● En ligne</div>`;
+        
+        sidebarUser.appendChild(avatarContainer);
+        sidebarUser.appendChild(divEl);
+
+        topUser.innerHTML = '';
+        const btnTop = document.createElement('button');
+        btnTop.className = 'btn-action';
+        btnTop.onclick = () => window.showPage('profile');
+        
+        if (avatarSource) {
+          const topImg = document.createElement('img');
+          topImg.src = avatarSource;
+          topImg.style.cssText = "width:22px; height:22px; border-radius:50%; object-fit:cover;";
+          btnTop.appendChild(topImg);
+        } else {
+          const topSpan = document.createElement('span');
+          topSpan.className = "user-avatar-fallback";
+          topSpan.style.cssText = "width:22px; height:22px; font-size:0.7rem; line-height:22px;";
+          topSpan.innerText = window.currentUser.username.charAt(0).toUpperCase();
+          btnTop.appendChild(topSpan);
+        }
+        
+        const spanTxt = document.createElement('span');
+        spanTxt.style.display = "inline-flex";
+        spanTxt.style.alignItems = "center";
+        spanTxt.innerHTML = `&nbsp;${window.escapeHTML(window.currentUser.username)}${verifiedHtml}`;
+        btnTop.appendChild(spanTxt);
+
+        topUser.appendChild(btnTop);
+      } else {
+        if (menuCloud) menuCloud.style.display = 'none';
+        if (menuReports) menuReports.style.display = 'none';
+        if (storageBox) storageBox.style.display = 'none';
+
+        const loginText = currentLang === 'en' ? 'Log in' : 'Se connecter';
+        sidebarUser.innerHTML = `<button class="btn-action primary" style="width:100%; justify-content:center;" onclick="window.openAuthModal()">${loginText}</button>`;
+        topUser.innerHTML = `<button class="btn-action primary" onclick="window.openAuthModal()">${loginText}</button>`;
+      }
+
+      const adminBtn = document.getElementById('btn-admin-add-news');
+      if (adminBtn) {
+        if (window.isNitfortAdmin()) {
+          adminBtn.style.display = "flex";
+        } else {
+          adminBtn.style.display = "none";
+        }
+      }
+    };
+
+    window.setStoreCategory = function(category, btn) {
+      currentCategory = category;
+      document.querySelectorAll('.store-filters .filter-btn').forEach(b => b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      window.renderStore(document.getElementById('search-input').value);
+    };
+
+    window.openDeveloperProfile = async function(devName) {
+      window.showPage('dev-view');
+
+      const avatarBox = document.getElementById('dev-avatar-box');
+      const nameBox = document.getElementById('dev-name-box');
+      const countBox = document.getElementById('dev-count-box');
+      const nameTitleBox = document.getElementById('dev-name-title-box');
+      const grid = document.getElementById('dev-games-grid');
+
+      let devData = { username: devName, avatar: null, isVerified: true };
+      if (window.db) {
+        try {
+          const usersSnap = await window.fsGetDocs(window.fsCollection(window.db, "publicUsers"));
+          usersSnap.forEach(userDoc => {
+            const data = userDoc.data();
+            if (data.username === devName) devData = data;
+          });
+        } catch(e) {}
+      }
+
+      const devGames = (window.gamesList || []).filter(g => g.author === devName);
+
+      const devAvatar = window.safeAvatarSource(devData.avatar);
+      if (devAvatar) {
+        const image = document.createElement('img');
+        image.src = devAvatar;
+        image.alt = '';
+        image.className = 'dev-profile-avatar';
+        avatarBox.replaceChildren(image);
+      } else {
+        const fallback = document.createElement('div');
+        fallback.className = 'user-avatar-fallback dev-profile-avatar';
+        fallback.style.cssText = 'font-size:2.5rem; line-height:100px;';
+        fallback.textContent = String(devName).charAt(0).toUpperCase();
+        avatarBox.replaceChildren(fallback);
+      }
+
+      nameBox.innerHTML = `${window.escapeHTML(devName)}`;
+      countBox.innerText = devGames.length;
+      nameTitleBox.innerHTML = `${window.escapeHTML(devName)}`;
+
+      grid.innerHTML = '';
+      if (devGames.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:30px;">Aucun projet publié par ce développeur pour le moment.</div>`;
+        return;
+      }
+
+      const isAdmin = window.isNitfortAdmin();
+
+      devGames.forEach(game => {
+        const title = String(game.title || '');
+        const coverSrc = window.safeAvatarSource(game.cover) || createDefaultCover(title);
+        const card = document.createElement('div');
+        card.className = 'game-card';
+
+        const image = document.createElement('img');
+        image.className = 'game-cover';
+        image.src = coverSrc;
+        const details = document.createElement('div');
+        details.className = 'game-details';
+        const name = document.createElement('div');
+        name.className = 'game-name';
+        name.textContent = title;
+        const footer = document.createElement('div');
+        footer.className = 'game-card-footer';
+        footer.style.marginTop = '15px';
+        const stats = document.createElement('div');
+        stats.className = 'game-stats';
+        const views = document.createElement('span');
+        views.innerHTML = '<i class="fa-solid fa-eye"></i> ';
+        views.appendChild(document.createTextNode(String(Number(game.views) || 0)));
+        const likes = document.createElement('span');
+        likes.innerHTML = '<i class="fa-solid fa-heart" style="color:var(--accent-pink);"></i> ';
+        likes.appendChild(document.createTextNode(String(Number(game.likes) || 0)));
+        stats.append(views, likes);
+
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex; gap:6px;';
+        const playButton = document.createElement('button');
+        playButton.className = 'btn-action primary';
+        playButton.innerHTML = '<i class="fa-solid fa-play"></i> Lancer';
+        playButton.onclick = () => window.playGame(game.id);
+        actions.appendChild(playButton);
+        if (isAdmin) {
+          const deleteButton = document.createElement('button');
+          deleteButton.className = 'btn-action';
+          deleteButton.style.cssText = 'background:rgba(239,68,68,0.2); color:#ef4444;';
+          deleteButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
+          deleteButton.onclick = () => window.deleteGame(game.id);
+          actions.appendChild(deleteButton);
+        }
+
+        footer.append(stats, actions);
+        details.append(name, footer);
+        card.append(image, details);
+        grid.appendChild(card);
+      });
+    };
+
+    window.renderStore = function(filterText = '') {
+      const container = document.getElementById('games-container');
+      if(!container) return;
+      container.innerHTML = '';
+
+      let filtered = (window.gamesList || []).filter(g => {
+        const matchesTitle = String(g.title || '').toLowerCase().includes(filterText.toLowerCase());
+        const matchesAuthor = String(g.author || '').toLowerCase().includes(filterText.toLowerCase());
+        return matchesTitle || matchesAuthor;
+      });
+
+      if (currentCategory === 'popular') {
+        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+      } else if (currentCategory === 'loved') {
+        filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+      } else if (currentCategory === 'recent') {
+        filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      }
+
+      if(filtered.length === 0) {
+        const emptyMsg = currentLang === 'en' ? 'No projects available at the moment.' : 'Aucun projet disponible pour le moment.';
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">${emptyMsg}</div>`;
+        return;
+      }
+
+      const isAdmin = window.isNitfortAdmin();
+
+      filtered.forEach(game => {
+        const title = String(game.title || '');
+        const author = String(game.author || '');
+        const fallbackSrc = createDefaultCover(title);
+        const coverSrc = window.safeAvatarSource(game.cover) || fallbackSrc;
+
+        const card = document.createElement('div');
+        card.className = 'game-card';
+
+        const img = document.createElement('img');
+        img.className = 'game-cover';
+        img.src = coverSrc;
+        img.onerror = function() {
+          this.onerror = null;
+          this.src = fallbackSrc;
+        };
+
+        const details = document.createElement('div');
+        details.className = 'game-details';
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'game-name';
+        nameDiv.textContent = title;
+
+        const authorDiv = document.createElement('div');
+        authorDiv.className = 'game-author-txt';
+        const byText = currentLang === 'en' ? 'Par ' : 'Par ';
+        authorDiv.innerHTML = `${byText} <strong>${window.escapeHTML(author)}</strong>`;
+        authorDiv.onclick = (e) => {
+          e.stopPropagation();
+          window.openDeveloperProfile(author);
+        };
+
+        const footerDiv = document.createElement('div');
+        footerDiv.className = 'game-card-footer';
+
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'game-stats';
+        const views = document.createElement('span');
+        views.innerHTML = '<i class="fa-solid fa-eye"></i> ';
+        views.appendChild(document.createTextNode(String(Number(game.views) || 0)));
+        const likes = document.createElement('span');
+        likes.innerHTML = '<i class="fa-solid fa-heart" style="color:var(--accent-pink);"></i> ';
+        likes.appendChild(document.createTextNode(String(Number(game.likes) || 0)));
+        statsDiv.append(views, likes);
+
+        const actionsDiv = document.createElement('div');
+        actionsDiv.style.cssText = "display:flex; gap:6px;";
+
+        const playBtn = document.createElement('button');
+        playBtn.className = 'btn-action primary';
+        const playText = currentLang === 'en' ? 'Launch' : 'Lancer';
+        playBtn.innerHTML = `<i class="fa-solid fa-play"></i> ${playText}`;
+        playBtn.onclick = () => window.playGame(game.id);
+        actionsDiv.appendChild(playBtn);
+
+        if(isAdmin || (window.currentUser && window.currentUser.username === game.author)) {
+          const delBtn = document.createElement('button');
+          delBtn.className = 'btn-action';
+          delBtn.style.cssText = 'background:rgba(239,68,68,0.2); color:#ef4444;';
+          delBtn.innerHTML = `<i class="fa-solid fa-trash"></i>`;
+          delBtn.onclick = () => window.deleteGame(game.id);
+          actionsDiv.appendChild(delBtn);
+        }
+
+        footerDiv.appendChild(statsDiv);
+        footerDiv.appendChild(actionsDiv);
+
+        details.appendChild(nameDiv);
+        details.appendChild(authorDiv);
+        details.appendChild(footerDiv);
+
+        card.appendChild(img);
+        card.appendChild(details);
+
+        container.appendChild(card);
+      });
+    };
+
+    window.renderMyGames = function() {
+      const container = document.getElementById('my-games-container');
+      if(!container) return;
+      container.innerHTML = '';
+      if(!window.currentUser) return;
+      const myGames = (window.gamesList || []).filter(g => g.author === window.currentUser.username);
+      if(myGames.length === 0) {
+        container.innerHTML = `<p style="color:var(--text-muted);">Vous n'avez encore publié aucun projet.</p>`;
+        return;
+      }
+      myGames.forEach(game => {
+        const title = String(game.title || '');
+        const coverSrc = window.safeAvatarSource(game.cover) || createDefaultCover(title);
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        const image = document.createElement('img');
+        image.className = 'game-cover';
+        image.src = coverSrc;
+        const details = document.createElement('div');
+        details.className = 'game-details';
+        const name = document.createElement('div');
+        name.className = 'game-name';
+        name.textContent = title;
+        details.appendChild(name);
+        card.append(image, details);
+        container.appendChild(card);
+      });
+    };
+
+    window.filterGames = function() {
+      window.renderStore(document.getElementById('search-input').value);
+    };
+
+    window.deleteGame = async function(id) {
+      if(window.db) {
+        try {
+          await window.fsDeleteDoc(window.fsDoc(window.db, "games", id));
+          window.showNitfortToast("Jeu supprimé !", "success");
+        } catch(e) {
+          window.showNitfortToast("Erreur : " + e.message, "error");
+        }
+      }
+    };
+
+    window.updateFileLabel = function(input, labelId) {
+      if(input.files && input.files[0]) {
+        document.getElementById(labelId).innerText = input.files[0].name;
+      }
+    };
+
+    window.handlePublishGame = function(e) {
+      e.preventDefault();
+      if(!window.currentUser) { window.openAuthModal(); return; }
+
+      const title = document.getElementById('upload-title').value;
+      const desc = document.getElementById('upload-desc').value;
+      const htmlFile = document.getElementById('upload-html').files[0];
+      const coverInput = document.getElementById('upload-cover');
+
+      const processPublish = function(coverBase64) {
+        const rHtml = new FileReader();
+        rHtml.onload = async function(eH) {
+          const newGame = {
+            title: title, description: desc, author: window.currentUser.username, authorUid: window.currentUser.uid,
+            cover: coverBase64 || createDefaultCover(title), code: eH.target.result,
+            views: 0, likes: 0, viewers: [], createdAt: Date.now()
+          };
+          if(window.db) {
+            try {
+              await window.fsAddDoc(window.fsCollection(window.db, "games"), newGame);
+              window.showNitfortToast("Jeu publié avec succès !", "success");
+              window.showPage('store');
+            } catch(err) {
+              window.showNitfortToast("Erreur de publication : " + err.message, "error");
+            }
+          }
+        };
+        rHtml.readAsText(htmlFile);
+      };
+
+      if(coverInput && coverInput.files && coverInput.files[0]) {
+        compressImage(coverInput.files[0], function(compressedBase64) {
+          processPublish(compressedBase64);
+        });
+      } else {
+        processPublish(null);
+      }
+    };
+
+    window.publishFromStudio = function() {
+      if(!window.currentUser) { window.openAuthModal(); return; }
+      document.getElementById('studio-pub-title').value = '';
+      document.getElementById('studio-pub-desc').value = '';
+      document.getElementById('studio-publish-modal').classList.add('active');
+    };
+
+    window.handleStudioPublishSubmit = async function(e) {
+      e.preventDefault();
+      if(!window.currentUser) return;
+      const title = document.getElementById('studio-pub-title').value;
+      const desc = document.getElementById('studio-pub-desc').value;
+      const codeContent = document.getElementById('studio-preview').srcdoc;
+      const coverInput = document.getElementById('studio-pub-cover');
+
+      const processPublish = async function(coverBase64) {
+        const newGame = {
+          title: title, description: desc, author: window.currentUser.username, authorUid: window.currentUser.uid,
+          cover: coverBase64 || createDefaultCover(title), code: codeContent,
+          views: 0, likes: 0, viewers: [], createdAt: Date.now()
+        };
+        if(window.db) {
+          try {
+            await window.fsAddDoc(window.fsCollection(window.db, "games"), newGame);
+            document.getElementById('studio-publish-modal').classList.remove('active');
+            window.showNitfortToast("Projet publié avec succès !", "success");
+            window.showPage('store');
+          } catch(err) {
+            window.showNitfortToast("Erreur de publication : " + err.message, "error");
+          }
+        }
+      };
+
+      if(coverInput && coverInput.files && coverInput.files[0]) {
+        compressImage(coverInput.files[0], function(compressedBase64) {
+          processPublish(compressedBase64);
+        });
+      } else {
+        processPublish(null);
+      }
+    };
+
+    window.playGame = async function(id) {
+      const game = (window.gamesList || []).find(g => g.id === id);
+      if(!game) return;
+      currentGameId = id;
+      document.getElementById('modal-game-title').innerText = game.title;
+      document.getElementById('modal-game-desc').innerText = game.description || "";
+      document.getElementById('modal-game-views').innerHTML = `<i class="fa-solid fa-eye"></i> ${game.views || 0} vues`;
+      document.getElementById('modal-likes').innerText = game.likes || 0;
+      document.getElementById('game-frame').srcdoc = addContextMenuBlocker(game.code || '');
+      document.getElementById('game-modal').classList.add('active');
+
+      let viewers = game.viewers || [];
+      let viewsCount = game.views || 0;
+      const viewerId = window.currentUser ? window.currentUser.username : sessionUserId;
+
+      if (!viewers.includes(viewerId)) {
+        viewers.push(viewerId);
+        viewsCount += 1;
+        if (window.db) {
+          try {
+            await window.fsUpdateDoc(window.fsDoc(window.db, "games", id), {
+              views: viewsCount,
+              viewers: viewers
+            });
+            document.getElementById('modal-game-views').innerHTML = `<i class="fa-solid fa-eye"></i> ${viewsCount} vues`;
+          } catch(e) {}
+        }
+      }
+    };
+
+    window.likeCurrentGame = async function() {
+      if (!currentGameId || !window.db) return;
+      const game = (window.gamesList || []).find(g => g.id === currentGameId);
+      if (!game) return;
+
+      let likesCount = (game.likes || 0) + 1;
+      try {
+        await window.fsUpdateDoc(window.fsDoc(window.db, "games", currentGameId), {
+          likes: likesCount
+        });
+        document.getElementById('modal-likes').innerText = likesCount;
+        window.showNitfortToast("Vous avez aimé ce jeu !", "success");
+      } catch(e) {
+        window.showNitfortToast("Erreur : " + e.message, "error");
+      }
+    };
+
+    window.closeGameModal = function() {
+      document.getElementById('game-modal').classList.remove('active');
+      document.getElementById('game-frame').srcdoc = '';
+      currentGameId = null;
+    };
+
+    window.toggleFullscreen = function() {
+      const elem = document.getElementById('fullscreen-target');
+      if(!document.fullscreenElement) elem.requestFullscreen();
+      else document.exitFullscreen();
+    };
+
+    window.toggleStudioFullscreen = function() {
+      const elem = document.getElementById('studio-preview-wrapper');
+      if(!document.fullscreenElement) elem.requestFullscreen();
+      else document.exitFullscreen();
+    };
+
+    const CODE_TEMPLATES = {
+      1.02: {
+        html: `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <style>body{background:#080915;color:#fff;text-align:center;padding-top:60px;font-family:sans-serif;}</style>\n</head>\n<body>\n  <h1>🚀 NITFORT Studio v1.0.2</h1>\n</body>\n</html>`,
+        javascript: `console.log("JS Engine actif");`,
+        python: `print("Python Engine actif")`
+      }
+    };
+
+    function initStudio() {
+      const tabsContainer = document.getElementById('studio-tabs-container');
+      if (!tabsContainer) return;
+
+      tabsContainer.innerHTML = `
+        <button class="lang-tab active" onclick="window.switchLanguage('html', this)">HTML5</button>
+        <button class="lang-tab" onclick="window.switchLanguage('javascript', this)">JS</button>
+        <button class="lang-tab" onclick="window.switchLanguage('python', this)">Python</button>
+      `;
+
+      if(!codeEditorInstance) {
+        codeEditorInstance = CodeMirror.fromTextArea(document.getElementById('code-editor-target'), {
+          mode: 'htmlmixed', theme: 'material-darker', lineNumbers: true, lineWrapping: true
+        });
+        codeEditorInstance.on('change', () => {
+          savedStudioCode = codeEditorInstance.getValue();
+          localStorage.setItem('nitfort_studio_code', savedStudioCode);
+          updateStudioPreview();
+        });
+      }
+      if(savedStudioCode) codeEditorInstance.setValue(savedStudioCode);
+      else codeEditorInstance.setValue(CODE_TEMPLATES[1.02].html);
+      setTimeout(() => codeEditorInstance.refresh(), 100);
+      updateStudioPreview();
+    }
+
+    window.switchLanguage = function(mode, btn) {
+      currentActiveMode = mode;
+      document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      if(codeEditorInstance) {
+        if(mode === 'html') codeEditorInstance.setOption('mode', 'htmlmixed');
+        else if(mode === 'javascript') codeEditorInstance.setOption('mode', 'javascript');
+        else if(mode === 'python') codeEditorInstance.setOption('mode', 'python');
+      }
+    };
+
+    function addContextMenuBlocker(html) {
+      const blocker = '<script>document.addEventListener("contextmenu",function(event){event.preventDefault();},true);<\/script>';
+      const headTag = /<head\b[^>]*>/i;
+      const doctype = /^(\s*<!doctype[^>]*>)/i.exec(html);
+      if (headTag.test(html)) return html.replace(headTag, match => match + blocker);
+      if (doctype) return doctype[0] + blocker + html.slice(doctype[0].length);
+      return blocker + html;
+    }
+
+    function updateStudioPreview() {
+      if(!codeEditorInstance) return;
+      document.getElementById('studio-preview').srcdoc = addContextMenuBlocker(codeEditorInstance.getValue());
+    }
+
+    window.downloadStudioCode = function() {
+      const code = codeEditorInstance ? codeEditorInstance.getValue() : '';
+      const blob = new Blob([code], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `mon-projet.html`;
+      a.click();
+    };
+
+    window.importStudioCode = function(input) {
+      const file = input.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        savedStudioCode = e.target.result;
+        if(codeEditorInstance) codeEditorInstance.setValue(savedStudioCode);
+        localStorage.setItem('nitfort_studio_code', savedStudioCode);
+      };
+      reader.readAsText(file);
+    };
+
+    function renderProfile() {
+      const box = document.getElementById('profile-box');
+      if(!window.currentUser) {
+        box.innerHTML = `<h2>Connectez-vous pour voir votre profil</h2>`;
+        return;
+      }
+      const isVerified = window.currentUser.isVerified;
+      const verifiedHtml = isVerified ? `<span class="verified-badge" title="Compte certifié"><i class="fa-solid fa-check"></i></span>` : '';
+
+      box.innerHTML = '';
+      
+      const avatarContainer = document.createElement('div');
+      avatarContainer.style.cssText = "display: flex; justify-content: center; margin-bottom: 15px;";
+      
+      const avatarSource = window.safeAvatarSource(window.currentUser.avatar);
+      if (avatarSource) {
+        const img = document.createElement('img');
+        img.src = avatarSource;
+        img.style.cssText = "width:90px; height:90px; border-radius:50%; border:3px solid var(--accent-primary); object-fit:cover; box-shadow: 0 0 20px var(--accent-primary);";
+        avatarContainer.appendChild(img);
+      } else {
+        const fallback = document.createElement('div');
+        fallback.className = "user-avatar-fallback";
+        fallback.style.cssText = "width:90px; height:90px; font-size:2.5rem; border-radius:50%; border:3px solid var(--accent-primary); box-shadow: 0 0 20px var(--accent-primary); line-height:90px;";
+        fallback.innerText = window.currentUser.username.charAt(0).toUpperCase();
+        avatarContainer.appendChild(fallback);
+      }
+      
+      const h2 = document.createElement('h2');
+      h2.style.display = "inline-flex";
+      h2.style.alignItems = "center";
+      h2.innerHTML = `${window.escapeHTML(window.currentUser.username)}&nbsp;${verifiedHtml}`;
+
+      const statusP = document.createElement('p');
+      statusP.style.cssText = "font-size:0.8rem; margin:5px 0 15px; color:" + (isVerified ? "var(--accent-green)" : "var(--accent-orange)") + ";";
+      if (isVerified) {
+        statusP.innerHTML = `<i class="fa-solid fa-shield-check"></i> Compte certifié`;
+      } else {
+        statusP.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Compte non certifié`;
+      }
+
+      const p = document.createElement('p');
+      p.style.cssText = "color:var(--text-muted); margin:10px 0;";
+      p.innerText = "Changer la photo de profil";
+
+      const btnUpload = document.createElement('div');
+      btnUpload.className = "custom-file-btn";
+      btnUpload.style.marginBottom = "15px";
+      btnUpload.innerHTML = `<i class="fa-solid fa-camera"></i> Choisir une nouvelle photo`;
+      btnUpload.onclick = () => document.getElementById('avatar-input').click();
+
+      const input = document.createElement('input');
+      input.type = "file";
+      input.id = "avatar-input";
+      input.accept = "image/*";
+      input.style.display = "none";
+      input.onchange = changeAvatar;
+
+      box.appendChild(avatarContainer);
+      box.appendChild(h2);
+      box.appendChild(statusP);
+      box.appendChild(p);
+      box.appendChild(btnUpload);
+      box.appendChild(input);
+
+      const btnCheckVerif = document.createElement('button');
+      btnCheckVerif.className = "btn-action primary";
+      btnCheckVerif.style.cssText = "width:100%; justify-content:center; margin-bottom:10px;";
+      btnCheckVerif.innerHTML = `<i class="fa-solid fa-rotate"></i> Actualiser mon statut (Vérifié)`;
+      btnCheckVerif.onclick = window.checkEmailVerificationStatus;
+      box.appendChild(btnCheckVerif);
+
+      const btnReport = document.createElement('button');
+      btnReport.className = "btn-action";
+      btnReport.style.cssText = "width:100%; justify-content:center; margin-bottom:10px; background:rgba(245,158,11,0.15); border-color:var(--accent-orange); color:var(--accent-orange);";
+      btnReport.innerHTML = `<i class="fa-solid fa-bug"></i> Signaler un problème / Contact Admin`;
+      btnReport.onclick = window.openReportModal;
+      box.appendChild(btnReport);
+
+      const btn2FA = document.createElement('button');
+      btn2FA.className = "btn-action";
+      btn2FA.style.cssText = "width:100%; justify-content:center; margin-bottom:10px; background:rgba(139,92,246,0.2); border-color:var(--accent-purple); color:white;";
+      btn2FA.innerHTML = `<i class="fa-solid fa-qrcode"></i> ${window.currentUser.totpEnabled ? 'Code TOTP actif ✅' : 'Activer un code TOTP'}`;
+      btn2FA.onclick = function() {
+        window.setupAuthenticator();
+      };
+      box.appendChild(btn2FA);
+
+      const btnResetPass = document.createElement('button');
+      btnResetPass.className = "btn-action";
+      btnResetPass.style.cssText = "width:100%; justify-content:center; margin-bottom:10px; background:rgba(6,182,212,0.15); border-color:var(--accent-cyan); color:white;";
+      btnResetPass.innerHTML = `<i class="fa-solid fa-key"></i> Changer de mot de passe (par e-mail)`;
+      btnResetPass.onclick = function() {
+        window.requestPasswordReset();
+      };
+      box.appendChild(btnResetPass);
+
+      if(!isVerified) {
+        const btnVerify = document.createElement('button');
+        btnVerify.className = "btn-action";
+        btnVerify.style.cssText = "width:100%; justify-content:center; margin-bottom:10px; background:rgba(6,182,212,0.2); border-color:var(--accent-cyan);";
+        btnVerify.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Renvoyer l'e-mail de certification`;
+        btnVerify.onclick = window.sendVerificationEmailOnly;
+        box.appendChild(btnVerify);
+      }
+
+      const btnLogout = document.createElement('button');
+      btnLogout.className = "btn-action";
+      btnLogout.style.cssText = "background:#ef4444; width:100%; justify-content:center;";
+      btnLogout.innerHTML = "Déconnexion";
+      btnLogout.onclick = logout;
+      box.appendChild(btnLogout);
+    }
+
+    async function changeAvatar(e) {
+      const file = e.target.files[0];
+      if(!file) return;
+      compressImage(file, async function(compressedBase64) {
+        window.currentUser.avatar = compressedBase64;
+        window.persistPublicUser();
+        if(window.db) {
+          try {
+            await window.fsSetDoc(window.fsDoc(window.db, "publicUsers", window.currentUser.uid), {
+              uid: window.currentUser.uid,
+              avatar: compressedBase64,
+              lastSeen: Date.now(),
+              totpEnabled: Boolean(window.currentUser.totpEnabled)
+            }, { merge: true });
+          } catch(e) {
+            window.showNitfortToast("Erreur : " + e.message, "error");
+          }
+        }
+        renderUserUI();
+        renderProfile();
+      });
+    }
+
+    window.changeTheme = function(theme) {
+      const nebula = document.getElementById('nebula-bg');
+      if(theme === 'purple') {
+        document.documentElement.style.setProperty('--accent-primary', '#8b5cf6');
+        nebula.style.background = `radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.35) 0%, transparent 55%), radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.3) 0%, transparent 55%)`;
+      } else if(theme === 'cyan') {
+        document.documentElement.style.setProperty('--accent-primary', '#06b6d4');
+        nebula.style.background = `radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.4) 0%, transparent 60%), radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.3) 0%, transparent 55%)`;
+      } else if(theme === 'pink') {
+        document.documentElement.style.setProperty('--accent-primary', '#ec4899');
+        nebula.style.background = `radial-gradient(circle at 75% 25%, rgba(236, 72, 153, 0.4) 0%, transparent 60%), radial-gradient(circle at 25% 75%, rgba(139, 92, 246, 0.3) 0%, transparent 55%)`;
+      } else if(theme === 'green') {
+        document.documentElement.style.setProperty('--accent-primary', '#10b981');
+        nebula.style.background = `radial-gradient(circle at 30% 70%, rgba(16, 185, 129, 0.4) 0%, transparent 60%), radial-gradient(circle at 70% 30%, rgba(6, 182, 212, 0.3) 0%, transparent 55%)`;
+      } else if(theme === 'orange') {
+        document.documentElement.style.setProperty('--accent-primary', '#f59e0b');
+        nebula.style.background = `radial-gradient(circle at 50% 30%, rgba(245, 158, 11, 0.4) 0%, transparent 60%), radial-gradient(circle at 50% 70%, rgba(236, 72, 153, 0.3) 0%, transparent 55%)`;
+      }
+    };
+
+    window.openAuthModal = function() { 
+      document.getElementById('auth-error-box').style.display = 'none';
+      document.getElementById('auth-modal').classList.add('active'); 
+    };
+
+    window.closeAuthModal = function() { document.getElementById('auth-modal').classList.remove('active'); };
+
+    window.toggleAuthMode = function() {
+      isRegisterAction = !isRegisterAction;
+      document.getElementById('auth-username-group').style.display = isRegisterAction ? 'block' : 'none';
+      document.getElementById('auth-modal-title').innerText = isRegisterAction ? "Créer un compte" : "Connexion";
+      document.getElementById('auth-submit-btn').innerText = isRegisterAction ? "S'inscrire" : "Se connecter";
+      document.getElementById('auth-switch-btn').innerText = isRegisterAction ? "Déjà un compte ? Se connecter" : "Pas de compte ? S'inscrire";
+    };
+
+    function logout() {
+      if (window.pendingInterval) clearInterval(window.pendingInterval);
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      if (window.firebaseAuth) signOut(window.firebaseAuth);
+      
+      window.currentUser = null;
+      localStorage.removeItem('nitfort_user');
+      localStorage.removeItem('nitfort_shared_cloud_owner');
+      localStorage.removeItem('nitfort_shared_cloud_owner_uid');
+      localStorage.removeItem('nitfort_shared_members');
+      window.sharedCloudOwner = null;
+      window.sharedCloudOwnerUid = null;
+      window.sharedMembers = [];
+
+      if (cloudUnsubscribe) { cloudUnsubscribe(); cloudUnsubscribe = null; }
+      if (membersUnsubscribe) { membersUnsubscribe(); membersUnsubscribe = null; }
+
+      renderUserUI();
+      window.showPage('store');
+    }
+
+    function initGalaxy() {
+      const canvas = document.getElementById('galaxy-canvas');
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = window.innerWidth;
+      let h = canvas.height = window.innerHeight;
+
+      const stars = Array.from({length: 150}, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.8,
+        s: Math.random() * 0.35 + 0.05
+      }));
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = '#ffffff';
+        stars.forEach(st => {
+          st.y -= st.s;
+          if(st.y < 0) st.y = h;
+          ctx.beginPath();
+          ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    window.onload = async function() {
+      applyTranslations();
+      initGalaxy();
+      renderUserUI();
+      await syncSharedCloudState();
+      if (window.currentUser) startPresenceHeartbeat();
+      window.showPage('store');
+    };
+  </script>
+</body>
+</html>
